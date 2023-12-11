@@ -1,5 +1,5 @@
+# Hamy tunkkaa ja rutisee oljypolttimen tunteja
 
-        
 sensor:
   - platform: history_stats
     name: "Oljypolttimen tuntilaskuri"
@@ -13,15 +13,16 @@ sensor:
     sensors:
       oil_burner_consumption:
         friendly_name: "Oljypolttimen litrat"
+# tuntilaskuri * oljynkulutus litroina tunnissa
         value_template: "{{ states('sensor.oljypolttimen_tuntilaskuri') | float * 4.6 }}"
         unit_of_measurement: "liters"
         
-
   - platform: template
     sensors:
       oil_tank_level_cm:
         friendly_name: "Oil Tank Level"
         unit_of_measurement: "cm"
+# aloituslukema - oljynkulutus litroina / litraa per sentti
         value_template: "{{ 102 - (states('sensor.oil_burner_consumption') | float / 37.5) }}"
         
   - platform: template
@@ -29,10 +30,9 @@ sensor:
       oil_consumption_cost:
         friendly_name: "Oil Consumption Cost"
         unit_of_measurement: "€"
+# oljynkulutus litroina * hinta euroina
         value_template: "{{ (states('sensor.oil_burner_consumption') | float) * 1.288 }}"
-
-
-
+        
 automation:
   - alias: "Paivita Oljypolttimen tilastot"
     trigger:
