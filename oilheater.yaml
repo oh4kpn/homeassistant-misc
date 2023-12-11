@@ -32,7 +32,17 @@ sensor:
         unit_of_measurement: "€"
 # oljynkulutus litroina * hinta euroina
         value_template: "{{ (states('sensor.oil_burner_consumption') | float) * 1.288 }}"
-        
+
+sensor:
+  - platform: history_stats
+    name: "Oil Burner Utilization Last 24h"
+    entity_id: binary_sensor.oljypoltin_arvonta_derivoimalla
+    state: "on"
+    type: time
+    start: "{{ now().timestamp() - 86400 }}"
+    end: "{{ now().timestamp() }}"
+    duration: "00:00:01"
+
 automation:
   - alias: "Paivita Oljypolttimen tilastot"
     trigger:
