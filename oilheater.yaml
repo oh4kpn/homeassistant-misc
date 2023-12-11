@@ -1,5 +1,5 @@
-# Hamy tunkkaa ja rutisee oljypolttimen tunteja
 
+        
 sensor:
   - platform: history_stats
     name: "Oljypolttimen tuntilaskuri"
@@ -13,16 +13,15 @@ sensor:
     sensors:
       oil_burner_consumption:
         friendly_name: "Oljypolttimen litrat"
-# tuntilaskuri * oljynkulutus litroina tunnissa
         value_template: "{{ states('sensor.oljypolttimen_tuntilaskuri') | float * 4.6 }}"
         unit_of_measurement: "liters"
         
+
   - platform: template
     sensors:
       oil_tank_level_cm:
         friendly_name: "Oil Tank Level"
         unit_of_measurement: "cm"
-# aloituslukema - oljynkulutus litroina / litraa per sentti
         value_template: "{{ 102 - (states('sensor.oil_burner_consumption') | float / 37.5) }}"
         
   - platform: template
@@ -30,10 +29,9 @@ sensor:
       oil_consumption_cost:
         friendly_name: "Oil Consumption Cost"
         unit_of_measurement: "€"
-# oljynkulutus litroina * hinta euroina
         value_template: "{{ (states('sensor.oil_burner_consumption') | float) * 1.288 }}"
 
-sensor:
+
   - platform: history_stats
     name: "Oil Burner On Hours Last 24h"
     entity_id: binary_sensor.oljypoltin_arvonta_derivoimalla
@@ -47,11 +45,7 @@ sensor:
       oil_burner_utilization_percent:
         friendly_name: "Oil Burner Utilization Last 24h (%)"
         unit_of_measurement: "%"
-        value_template: >-
-          {% set total_seconds = state_attr('sensor.oil_burner_on_hours_last_24h', 'sum') %}
-          {% set seconds_in_a_day = 86400 %}
-          {{ ((total_seconds / seconds_in_a_day) * 100) | round(2) }}
-
+        value_template: "{{ states('sensor.oil_burner_on_hours_last_24h') | float / 24 * 100 | round(2)}}"
 
 automation:
   - alias: "Paivita Oljypolttimen tilastot"
@@ -67,3 +61,5 @@ automation:
         entity_id: sensor.oil_consumption_cost
       - service: homeassistant.update_entity
         entity_id: sensor.oil_burner_utilization_percent
+
+
