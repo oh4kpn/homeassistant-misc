@@ -35,13 +35,23 @@ sensor:
 
 sensor:
   - platform: history_stats
-    name: "Oil Burner Utilization Last 24h"
+    name: "Oil Burner On Hours Last 24h"
     entity_id: binary_sensor.oljypoltin_arvonta_derivoimalla
     state: "on"
     type: time
-    start: "{{ now().timestamp() - 86400 }}"
-    end: "{{ now().timestamp() }}"
-    duration: "00:00:01"
+    end: "{{ now() }}"
+    duration: "24:00:00"
+
+  - platform: template
+    sensors:
+      oil_burner_utilization_percent:
+        friendly_name: "Oil Burner Utilization Last 24h (%)"
+        unit_of_measurement: "%"
+        value_template: >-
+          {% set total_seconds = state_attr('sensor.oil_burner_on_hours_last_24h', 'sum') %}
+          {% set seconds_in_a_day = 86400 %}
+          {{ ((total_seconds / seconds_in_a_day) * 100) | round(2) }}
+
 
 automation:
   - alias: "Paivita Oljypolttimen tilastot"
@@ -55,3 +65,5 @@ automation:
         entity_id: sensor.oil_tank_level_cm
       - service: homeassistant.update_entity
         entity_id: sensor.oil_consumption_cost
+      - service: homeassistant.update_entity
+        entity_id: oil_burner_utilization_percent
