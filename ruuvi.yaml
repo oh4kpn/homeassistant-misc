@@ -1,0 +1,8 @@
+sensor:
+  - platform: ruuvi_ble
+    sensors:
+      screw_patio_west:
+        mac: "C1:30:5D:F9:76:34"
+        calibrate:
+          temperature: -1.5  # Adjust this value based on your calibration needs
+          humidity: -273.0 # Adjust this value based on your calibration needs
