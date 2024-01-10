@@ -11,8 +11,6 @@
       force_update: true
       filters:
         - offset: -0.1 # Adjust this value based on your calibration needs - last calibrated 2024-01-10
-    battery_voltage:
-      name: "Hamyla Patio West Battery Voltage"
     pressure:
       name: "Hamyla Patio West Pressure"
     acceleration:
@@ -31,3 +29,35 @@
       name: "Hamyla Patio West Movement Counter"
     measurement_sequence_number:
       name: "Hamyla Patio West Measurement Sequence Number"
+      
+  - platform: ruuvitag
+    mac_address: F0:0B:40:48:10:71
+    # "Hamyla Patio North"
+    humidity:
+      name: "Hamyla Patio North Humidity"
+      force_update: true
+      filters:
+        - offset: 0 # Adjust this value based on your calibration needs
+    temperature:
+      name: "Hamyla Patio North Temperature"
+      force_update: true
+      filters:
+        - offset: +2 # Adjust this value based on your calibration needs - last calibrated 2024-01-10
+    pressure:
+      name: "Hamyla Patio North Pressure"
+    acceleration:
+      name: "Hamyla Patio North Acceleration"
+    acceleration_x:
+      name: "Hamyla Patio North Acceleration X"
+    acceleration_y:
+      name: "Hamyla Patio North Acceleration Y"
+    acceleration_z:
+      name: "Hamyla Patio North Acceleration Z"
+    battery_voltage:
+      name: "Hamyla Patio North Battery Voltage"
+    tx_power:
+      name: "Hamyla Patio North TX Power"
+    movement_counter:
+      name: "Hamyla Patio North Movement Counter"
+    measurement_sequence_number:
+      name: "Hamyla Patio North Measurement Sequence Number"
