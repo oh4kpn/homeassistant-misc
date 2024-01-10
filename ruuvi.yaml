@@ -1,14 +1,33 @@
   - platform: ruuvitag
     mac_address: C1:30:5D:F9:76:34
+    # "Hamyla Patio West"
     humidity:
-      name: "Patio West RuuviTag Humidity"
+      name: "Hamyla Patio West Humidity"
       force_update: true
       filters:
         - offset: 0 # Adjust this value based on your calibration needs
     temperature:
-      name: "Patio West RuuviTag Temperature Calibrated"
+      name: "Hamyla Patio West Temperature"
       force_update: true
       filters:
         - offset: -0.1 # Adjust this value based on your calibration needs - last calibrated 2024-01-10
     battery_voltage:
-      name: "Patio West RuuviTag Battery Voltage"
+      name: "Hamyla Patio West Battery Voltage"
+    pressure:
+      name: "Hamyla Patio West Pressure"
+    acceleration:
+      name: "Hamyla Patio West Acceleration"
+    acceleration_x:
+      name: "UHamyla Patio West Acceleration X"
+    acceleration_y:
+      name: "UHamyla Patio West Acceleration Y"
+    acceleration_z:
+      name: "Hamyla Patio West Acceleration Z"
+    battery_voltage:
+      name: "Hamyla Patio West Battery Voltage"
+    tx_power:
+      name: "Hamyla Patio West TX Power"
+    movement_counter:
+      name: "UHamyla Patio West Movement Counter"
+    measurement_sequence_number:
+      name: "Hamyla Patio West Measurement Sequence Number"
