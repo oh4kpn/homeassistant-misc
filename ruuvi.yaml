@@ -18,9 +18,9 @@
     acceleration:
       name: "Hamyla Patio West Acceleration"
     acceleration_x:
-      name: "UHamyla Patio West Acceleration X"
+      name: "Hamyla Patio West Acceleration X"
     acceleration_y:
-      name: "UHamyla Patio West Acceleration Y"
+      name: "Hamyla Patio West Acceleration Y"
     acceleration_z:
       name: "Hamyla Patio West Acceleration Z"
     battery_voltage:
@@ -28,6 +28,6 @@
     tx_power:
       name: "Hamyla Patio West TX Power"
     movement_counter:
-      name: "UHamyla Patio West Movement Counter"
+      name: "Hamyla Patio West Movement Counter"
     measurement_sequence_number:
       name: "Hamyla Patio West Measurement Sequence Number"
