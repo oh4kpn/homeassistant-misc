@@ -1,8 +1,12 @@
-sensor:
-  - platform: ruuvi_ble
-    sensors:
-      screw_patio_west:
-        mac: "C1:30:5D:F9:76:34"
-        calibrate:
-          temperature: -1.5  # Adjust this value based on your calibration needs
-          humidity: -273.0 # Adjust this value based on your calibration needs
+  - platform: ruuvitag
+    mac_address: C1:30:5D:F9:76:34
+    humidity:
+      name: "Patio West RuuviTag Humidity"
+      force_update: true
+    temperature:
+      name: "Patio West RuuviTag Temperature Calibrated"
+      force_update: true
+      filters:
+        - offset: -0.1 # Adjust this value based on your calibration needs
+    battery_voltage:
+      name: "Patio West RuuviTag Battery Voltage"
