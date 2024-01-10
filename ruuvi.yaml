@@ -3,6 +3,8 @@
     humidity:
       name: "Patio West RuuviTag Humidity"
       force_update: true
+      filters:
+        - offset: 0 # Adjust this value based on your calibration needs
     temperature:
       name: "Patio West RuuviTag Temperature Calibrated"
       force_update: true
