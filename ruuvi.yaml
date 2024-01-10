@@ -9,6 +9,6 @@
       name: "Patio West RuuviTag Temperature Calibrated"
       force_update: true
       filters:
-        - offset: -0.1 # Adjust this value based on your calibration needs last calibrated 2024-01-10
+        - offset: -0.1 # Adjust this value based on your calibration needs - last calibrated 2024-01-10
     battery_voltage:
       name: "Patio West RuuviTag Battery Voltage"
