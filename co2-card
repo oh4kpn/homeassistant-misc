@@ -62,3 +62,21 @@ cards:
                               red;
                             {% endif %}
                   }
+
+          - type: custom:config-template-card
+            entities:
+              - sensor.ruuvitag_0d34_temperature
+            card:
+              type: entities
+              entities:
+                - entity: sensor.ruuvitag_0d34_temperature
+                  secondary_info: last-updated
+              card_mod:
+                style: |
+                  ha-card {
+                    color: {% if 18 <= states('sensor.ruuvitag_0d34_temperature')|float <= 21 %}
+                              green;
+                            {% else %}
+                              red;
+                            {% endif %}
+                  }
