@@ -20,7 +20,7 @@ cards:
               card_mod:
                 style: |
                   ha-card {
-                    color: {% if 0 <= states('sensor.olohuone2022_carbon_dioxide')|float <= 801 %}
+                    color: {% if 0 <= states('sensor.olohuone2022_carbon_dioxide')|float <= 800 %}
                               green;
                             {% else %}
                               red;
@@ -37,7 +37,7 @@ cards:
               card_mod:
                 style: |
                   ha-card {
-                    color: {% if 0 <= states('sensor.olohuone2022_makuuhuone2022_carbon_dioxide')|float <= 801 %}
+                    color: {% if 0 <= states('sensor.olohuone2022_makuuhuone2022_carbon_dioxide')|float <= 800 %}
                               green;
                             {% else %}
                               red;
