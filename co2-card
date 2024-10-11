@@ -26,6 +26,7 @@ cards:
                               red;
                             {% endif %}
                   }
+
           - type: custom:config-template-card
             entities:
               - sensor.olohuone2022_makuuhuone2022_carbon_dioxide
@@ -38,6 +39,24 @@ cards:
                 style: |
                   ha-card {
                     color: {% if 0 <= states('sensor.olohuone2022_makuuhuone2022_carbon_dioxide')|float <= 800 %}
+                              green;
+                            {% else %}
+                              red;
+                            {% endif %}
+                  }
+
+          - type: custom:config-template-card
+            entities:
+              - sensor.olohuone_ruuvitag_temperature_5
+            card:
+              type: entities
+              entities:
+                - entity: sensor.olohuone_ruuvitag_temperature_5
+                  secondary_info: last-updated
+              card_mod:
+                style: |
+                  ha-card {
+                    color: {% if 20 <= states('sensor.olohuone_ruuvitag_temperature_5')|float <= 23 %}
                               green;
                             {% else %}
                               red;
