@@ -1,36 +1,45 @@
 /* dependencies: hacs, card_mod, config-template-card  */
-type: vertical-stack
+square: false
+columns: 1
+type: grid
 cards:
-  - type: custom:config-template-card
-    entities:
-      - sensor.olohuone2022_carbon_dioxide
-    card:
-      type: entities
-      entities:
-        - entity: sensor.olohuone2022_carbon_dioxide
-      card_mod:
-        style: |
-          ha-card {
-            color: {% if 0 <= states('sensor.olohuone2022_carbon_dioxide')|float <= 800 %}
-                      green;
-                    {% else %}
-                      red;
-                    {% endif %}
-          }
-          
-  - type: custom:config-template-card
-    entities:
-      - sensor.olohuone2022_makuuhuone2022_carbon_dioxide
-    card:
-      type: entities
-      entities:
-        - entity: sensor.olohuone2022_makuuhuone2022_carbon_dioxide
-      card_mod:
-        style: |
-          ha-card {
-            color: {% if 0 <= states('sensor.olohuone2022_makuuhuone2022_carbon_dioxide')|float <= 800 %}
-                      green;
-                    {% else %}
-                      red;
-                    {% endif %}
-          }
+  - columns: 1
+    type: grid
+    square: false
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:config-template-card
+            entities:
+              - sensor.olohuone2022_carbon_dioxide
+            card:
+              type: entities
+              entities:
+                - entity: sensor.olohuone2022_carbon_dioxide
+                  secondary_info: last-updated
+              card_mod:
+                style: |
+                  ha-card {
+                    color: {% if 0 <= states('sensor.olohuone2022_carbon_dioxide')|float <= 801 %}
+                              green;
+                            {% else %}
+                              red;
+                            {% endif %}
+                  }
+          - type: custom:config-template-card
+            entities:
+              - sensor.olohuone2022_makuuhuone2022_carbon_dioxide
+            card:
+              type: entities
+              entities:
+                - entity: sensor.olohuone2022_makuuhuone2022_carbon_dioxide
+                  secondary_info: last-updated
+              card_mod:
+                style: |
+                  ha-card {
+                    color: {% if 0 <= states('sensor.olohuone2022_makuuhuone2022_carbon_dioxide')|float <= 801 %}
+                              green;
+                            {% else %}
+                              red;
+                            {% endif %}
+                  }
