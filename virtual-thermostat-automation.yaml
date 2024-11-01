@@ -1,0 +1,46 @@
+alias: >-
+  Set Olohuone Temperature Based on
+  switch.virtual_switch_livingroom_heating_thermostat state
+description: ""
+triggers:
+  - entity_id:
+      - switch.virtual_switch_livingroom_heating_thermostat
+    to: "on"
+    trigger: state
+  - entity_id:
+      - switch.virtual_switch_livingroom_heating_thermostat
+    to: "off"
+    trigger: state
+  - minutes: /3
+    trigger: time_pattern
+conditions: []
+actions:
+  - target:
+      entity_id:
+        - climate.oh_ruokatila
+        - climate.oh_paaty
+        - climate.oh_tv
+    data_template:
+      temperature: >
+        {% if is_state('switch.virtual_switch_livingroom_heating_thermostat',
+        'on') %}
+          25.0
+        {% elif is_state('switch.virtual_switch_livingroom_heating_thermostat',
+        'off') %}
+          16.0
+        {% endif %}
+    action: climate.set_temperature
+  - target:
+      entity_id:
+        - climate.tyohuone
+    data_template:
+      temperature: >
+        {% if is_state('switch.virtual_switch_livingroom_heating_thermostat',
+        'on') %}
+          21.5
+        {% elif is_state('switch.virtual_switch_livingroom_heating_thermostat',
+        'off') %}
+          12.0
+        {% endif %}
+    action: climate.set_temperature
+mode: single
