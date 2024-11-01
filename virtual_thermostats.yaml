@@ -1,0 +1,40 @@
+input_boolean:
+
+  livingroom_heating_thermostat_active:
+    name: Olohuoneen lämmitystermostaatti aktiivinen
+    initial: false
+  
+  livingroom_cooling_thermostat_active:
+    name: Olohuoneen jäähdytystermostaatti aktiivinen
+    initial: false
+
+  workroom_heating_thermostat_active:
+    name: Tyohuoneen lämmitystermostaatti aktiivinen
+    initial: false
+
+  workroom_cooling_thermostat_active:
+    name: Tyohuoneen jäähdytystermostaatti aktiivinen
+    initial: false
+
+  bedroom_heating_thermostat_active:
+    name: Makuuhuoneen lämmitystermostaatti aktiivinen
+    initial: false
+
+  bedroom_heating_thermostat_active:
+    name: Makuuhuoneen jäähdytystermostaatti aktiivinen
+    initial: false
+
+switch:
+  - platform: template
+    switches:
+      virtual_switch_livingroom_heating_thermostat:
+        friendly_name: "Olohuoneen virtuaalinen lammitystermari"
+        value_template: "{{ is_state('input_boolean.livingroom_heating_thermostat_active', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.livingroom_heating_thermostat_active
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.livingroom_heating_thermostat_active
