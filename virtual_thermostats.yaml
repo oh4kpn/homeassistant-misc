@@ -38,3 +38,58 @@ switch:
           service: input_boolean.turn_off
           target:
             entity_id: input_boolean.livingroom_heating_thermostat_active
+      virtual_switch_livingroom_cooling_thermostat:
+        friendly_name: "Olohuoneen virtuaalinen jäähdytystermari"
+        value_template: "{{ is_state('input_boolean.livingroom_cooling_thermostat_active', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.livingroom_cooling_thermostat_active
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.livingroom_cooling_thermostat_active
+      virtual_switch_workroom_heating_thermostat:
+        friendly_name: "Tyohuoneen virtuaalinen lämmitystermari"
+        value_template: "{{ is_state('input_boolean.workroom_heating_thermostat_active', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.workroom_heating_thermostat_active
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.workroom_heating_thermostat_active
+      virtual_switch_workroom_cooling_thermostat:
+        friendly_name: "Tyohuoneen virtuaalinen jäähdytystermari"
+        value_template: "{{ is_state('input_boolean.workroom_cooling_thermostat_active', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.workroom_cooling_thermostat_active
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.workroom_cooling_thermostat_active
+      virtual_switch_bedroom_heating_thermostat:
+        friendly_name: "Makuuhuoneen virtuaalinen lämmitystermari"
+        value_template: "{{ is_state('input_boolean.bedroom_heating_thermostat_active', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.bedroom_heating_thermostat_active
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.bedroom_heating_thermostat_active
+      virtual_switch_bedroom_cooling_thermostat:
+        friendly_name: "Makuuhuoneen virtuaalinen jäähdytystermari"
+        value_template: "{{ is_state('input_boolean.bedroom_cooling_thermostat_active', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.bedroom_cooling_thermostat_active
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.bedroom_cooling_thermostat_active
