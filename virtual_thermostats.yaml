@@ -20,7 +20,7 @@ input_boolean:
     name: Makuuhuoneen lämmitystermostaatti aktiivinen
     initial: false
 
-  bedroom_heating_thermostat_active:
+  bedroom_cooling_thermostat_active:
     name: Makuuhuoneen jäähdytystermostaatti aktiivinen
     initial: false
 
