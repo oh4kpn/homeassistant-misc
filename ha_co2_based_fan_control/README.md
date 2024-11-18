@@ -1,6 +1,7 @@
 # Home Assistant Configuration for CO2-Based Fan Control
 
 This repository contains a Home Assistant configuration that adjusts the fan speed based on CO2 levels in a room.
+Warning: ChatGPT was used here
 
 ## Structure
 
