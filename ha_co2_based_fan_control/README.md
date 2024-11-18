@@ -6,6 +6,7 @@ This repository contains a Home Assistant configuration that adjusts the fan spe
 
 - **automations/fan_control.yaml**: Contains the automation for adjusting the fan speed steplessly based on CO2 levels.
 - **sensors/makuuhuone_fan_percentage.yaml**: Template sensor configuration for displaying the fan speed percentage.
+- **esp32_codes/makkari.esp32.conf**: Template for adding configuration for esphome
 
 ## How It Works
 
