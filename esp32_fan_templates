@@ -1,6 +1,0 @@
-template:
-  - sensor:
-      - name: "Makuuhuone Fan Speed Percentage"
-        unit_of_measurement: "%"
-        state: >
-          {{ state_attr('fan.esp32_fan_makkari_makuuhuone_fan_pwm', 'percentage') }}
