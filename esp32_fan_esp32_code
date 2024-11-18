@@ -1,0 +1,23 @@
+sensor:
+  - platform: pulse_counter
+    pin: GPIO13
+    name: Makuuhuone Fan
+    id: fan_pulse
+    unit_of_measurement: 'RPM'
+    filters:
+      - multiply: 0.5
+    count_mode:
+      rising_edge: INCREMENT
+      falling_edge: DISABLE
+    update_interval: 3s
+
+output:
+  - platform: ledc
+    pin: GPIO12
+    frequency: 1000 Hz
+    id: makuuhuone_fan_pwm
+
+fan:
+  - platform: speed
+    output: makuuhuone_fan_pwm
+    name: "Makuuhuone Fan PWM"
