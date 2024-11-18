@@ -1,0 +1,19 @@
+alias: Stepless Fan Speed Adjustment Based on CO2 Levels
+trigger:
+  - platform: state
+    entity_id: sensor.olohuone2022_makuuhuone2022_carbon_dioxide
+action:
+  - service: fan.set_percentage
+    target:
+      entity_id: fan.esp32_fan_makkari_makuuhuone_fan_pwm
+    data:
+      percentage: >
+        {% set co2 = states('sensor.olohuone2022_makuuhuone2022_carbon_dioxide') | float %}
+        {% if co2 < 500 %}
+          0
+        {% elif co2 > 900 %}
+          100
+        {% else %}
+          {{ ((co2 - 500) / (900 - 500) * 100) | round(0) }}
+        {% endif %}
+mode: single
