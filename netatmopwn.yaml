@@ -2,36 +2,118 @@
 
 template:
   - sensor:
-      - name: "Netatmo PWM Ohjattu Lämpötila"
+      - name: "Netatmo PWM-pohjattu Lämpötila"
         state: >
-          {% set thermostats = {
-            'climate.makuuhuone': {'sensor': 'sensor.ruuvitag_0d34_temperature', 'target': states('input_number.makuuhuone_target') | float},
-            'climate.oh_paaty': {'sensor': 'sensor.calibrated_olohuone_temperature', 'target': states('input_number.oh_paaty_target') | float},
-            'climate.oh_ruokatila': {'sensor': 'sensor.calibrated_olohuone_temperature', 'target': states('input_number.oh_ruokatila_target') | float},
-            'climate.oh_tv': {'sensor': 'sensor.calibrated_olohuone_temperature', 'target': states('input_number.oh_tv_target') | float},
-            'climate.tyohuone': {'sensor': 'sensor.ruuvitag_6b98_temperature', 'target': states('input_number.tyohuone_target') | float}
-          } %}
+          {% set makuuhuone_current_temp = states('sensor.ruuvitag_0d34_temperature') | float %}
+          {% set makuuhuone_target_temp = states('input_number.makuuhuone_target') | float %}
+          {% set makuuhuone_error = makuuhuone_target_temp - makuuhuone_current_temp %}
           
-          {% set results = {} %}
-          {% for climate, data in thermostats.items() %}
-            {% set current_temp = states(data.sensor) | float %}
-            {% set target_temp = data.target | float %}
-            {% set error = target_temp - current_temp %}
-            
-            {% if error < 0.2 %}
-              {% set pwm_temp = target_temp %}
-            {% elif error < 0.5 %}
-              {% set pwm_temp = target_temp + (0.5 if now().minute % 6 < 3 else -0.5) %}
-            {% elif error < 1.5 %}
-              {% set pwm_temp = target_temp + (1.0 if now().minute % 6 < 3 else -1.0) %}
-            {% else %}
-              {% set pwm_temp = target_temp + 1.5 %}
-            {% endif %}
-            
-            {% set results = results.copy() %}
-            {% set _ = results.update({climate: pwm_temp}) %}
-          {% endfor %}
-          {{ results | tojson }}
+          {% if makuuhuone_error < -1.5 %}
+            {% set makuuhuone_pwm_temp = makuuhuone_target_temp - 1.5 %}
+          {% elif makuuhuone_error < -0.5 %}
+            {% set makuuhuone_pwm_temp = makuuhuone_target_temp - (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% elif makuuhuone_error < -0.2 %}
+            {% set makuuhuone_pwm_temp = makuuhuone_target_temp - (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif makuuhuone_error < 0.2 %}
+            {% set makuuhuone_pwm_temp = makuuhuone_target_temp %}
+          {% elif makuuhuone_error < 0.5 %}
+            {% set makuuhuone_pwm_temp = makuuhuone_target_temp + (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif makuuhuone_error < 1.5 %}
+            {% set makuuhuone_pwm_temp = makuuhuone_target_temp + (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% else %}
+            {% set makuuhuone_pwm_temp = makuuhuone_target_temp + 1.5 %}
+          {% endif %}
+          
+          {% set oh_paaty_current_temp = states('sensor.calibrated_olohuone_temperature') | float %}
+          {% set oh_paaty_target_temp = states('input_number.oh_paaty_target') | float %}
+          {% set oh_paaty_error = oh_paaty_target_temp - oh_paaty_current_temp %}
+          
+          {% if oh_paaty_error < -1.5 %}
+            {% set oh_paaty_pwm_temp = oh_paaty_target_temp - 1.5 %}
+          {% elif oh_paaty_error < -0.5 %}
+            {% set oh_paaty_pwm_temp = oh_paaty_target_temp - (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% elif oh_paaty_error < -0.2 %}
+            {% set oh_paaty_pwm_temp = oh_paaty_target_temp - (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif oh_paaty_error < 0.2 %}
+            {% set oh_paaty_pwm_temp = oh_paaty_target_temp %}
+          {% elif oh_paaty_error < 0.5 %}
+            {% set oh_paaty_pwm_temp = oh_paaty_target_temp + (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif oh_paaty_error < 1.5 %}
+            {% set oh_paaty_pwm_temp = oh_paaty_target_temp + (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% else %}
+            {% set oh_paaty_pwm_temp = oh_paaty_target_temp + 1.5 %}
+          {% endif %}
+          
+          {% set oh_ruokatila_current_temp = states('sensor.calibrated_olohuone_temperature') | float %}
+          {% set oh_ruokatila_target_temp = states('input_number.oh_ruokatila_target') | float %}
+          {% set oh_ruokatila_error = oh_ruokatila_target_temp - oh_ruokatila_current_temp %}
+          
+          {% if oh_ruokatila_error < -1.5 %}
+            {% set oh_ruokatila_pwm_temp = oh_ruokatila_target_temp - 1.5 %}
+          {% elif oh_ruokatila_error < -0.5 %}
+            {% set oh_ruokatila_pwm_temp = oh_ruokatila_target_temp - (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% elif oh_ruokatila_error < -0.2 %}
+            {% set oh_ruokatila_pwm_temp = oh_ruokatila_target_temp - (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif oh_ruokatila_error < 0.2 %}
+            {% set oh_ruokatila_pwm_temp = oh_ruokatila_target_temp %}
+          {% elif oh_ruokatila_error < 0.5 %}
+            {% set oh_ruokatila_pwm_temp = oh_ruokatila_target_temp + (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif oh_ruokatila_error < 1.5 %}
+            {% set oh_ruokatila_pwm_temp = oh_ruokatila_target_temp + (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% else %}
+            {% set oh_ruokatila_pwm_temp = oh_ruokatila_target_temp + 1.5 %}
+          {% endif %}
+          
+          {% set oh_tv_current_temp = states('sensor.calibrated_olohuone_temperature') | float %}
+          {% set oh_tv_target_temp = states('input_number.oh_tv_target') | float %}
+          {% set oh_tv_error = oh_tv_target_temp - oh_tv_current_temp %}
+          
+          {% if oh_tv_error < -1.5 %}
+            {% set oh_tv_pwm_temp = oh_tv_target_temp - 1.5 %}
+          {% elif oh_tv_error < -0.5 %}
+            {% set oh_tv_pwm_temp = oh_tv_target_temp - (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% elif oh_tv_error < -0.2 %}
+            {% set oh_tv_pwm_temp = oh_tv_target_temp - (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif oh_tv_error < 0.2 %}
+            {% set oh_tv_pwm_temp = oh_tv_target_temp %}
+          {% elif oh_tv_error < 0.5 %}
+            {% set oh_tv_pwm_temp = oh_tv_target_temp + (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif oh_tv_error < 1.5 %}
+            {% set oh_tv_pwm_temp = oh_tv_target_temp + (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% else %}
+            {% set oh_tv_pwm_temp = oh_tv_target_temp + 1.5 %}
+          {% endif %}
+          
+          {% set tyohuone_current_temp = states('sensor.ruuvitag_6b98_temperature') | float %}
+          {% set tyohuone_target_temp = states('input_number.tyohuone_target') | float %}
+          {% set tyohuone_error = tyohuone_target_temp - tyohuone_current_temp %}
+          
+          {% if tyohuone_error < -1.5 %}
+            {% set tyohuone_pwm_temp = tyohuone_target_temp - 1.5 %}
+          {% elif tyohuone_error < -0.5 %}
+            {% set tyohuone_pwm_temp = tyohuone_target_temp - (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% elif tyohuone_error < -0.2 %}
+            {% set tyohuone_pwm_temp = tyohuone_target_temp - (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif tyohuone_error < 0.2 %}
+            {% set tyohuone_pwm_temp = tyohuone_target_temp %}
+          {% elif tyohuone_error < 0.5 %}
+            {% set tyohuone_pwm_temp = tyohuone_target_temp + (0.5 if now().minute % 6 < 3 else -0.5) %}
+          {% elif tyohuone_error < 1.5 %}
+            {% set tyohuone_pwm_temp = tyohuone_target_temp + (1.0 if now().minute % 6 < 3 else -1.0) %}
+          {% else %}
+            {% set tyohuone_pwm_temp = tyohuone_target_temp + 1.5 %}
+          {% endif %}
+          
+          {{ {
+            'climate.makuuhuone': makuuhuone_pwm_temp,
+            'climate.oh_paaty': oh_paaty_pwm_temp,
+            'climate.oh_ruokatila': oh_ruokatila_pwm_temp,
+            'climate.oh_tv': oh_tv_pwm_temp,
+            'climate.tyohuone': tyohuone_pwm_temp
+          } | tojson }}
+
+          
+
 
 automation:
   - alias: "Päivitä Netatmo PWM lämpötilat"
@@ -41,7 +123,6 @@ automation:
     action:
       - variables:
           thermostats:
-            climate.makuuhuone: sensor.ruuvitag_0d34_temperature
             climate.oh_paaty: sensor.calibrated_olohuone_temperature
             climate.oh_ruokatila: sensor.calibrated_olohuone_temperature
             climate.oh_tv: sensor.calibrated_olohuone_temperature
@@ -52,8 +133,9 @@ automation:
             - service: climate.set_temperature
               data:
                 entity_id: "{{ repeat.item }}"
-                temperature: "{{ state_attr('sensor.netatmo_pwm_ohjattu_lampotila', repeat.item) | float(default=20) }}"
+                temperature: "{{ state_attr('sensor.netatmo_pwm_ohjattu_lampotilas', repeat.item) | float(default=20) }}"
     mode: single
+    
 
 input_number:
   makuuhuone_target:
