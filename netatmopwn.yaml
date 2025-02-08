@@ -123,20 +123,21 @@ automation:
     action:
       - variables:
           thermostats:
-            climate.makuuhuone: sensor.ruuvitag_0d34_temperature
             climate.oh_paaty: sensor.calibrated_olohuone_temperature
             climate.oh_ruokatila: sensor.calibrated_olohuone_temperature
             climate.oh_tv: sensor.calibrated_olohuone_temperature
             climate.tyohuone: sensor.ruuvitag_6b98_temperature
-
+            climate.makuuhuone: sensor.ruuvitag_0d34_temperature
       - repeat:
           for_each: "{{ thermostats.keys() | list }}"
           sequence:
             - service: climate.set_temperature
               data:
                 entity_id: "{{ repeat.item }}"
-                temperature: "{{ state_attr('sensor.netatmo_pwm_pohjattu_lampotila', repeat.item) | float(default=20) }}"
+                temperature: >
+                  {{ (states('sensor.netatmo_pwm_pohjattu_lampotila') | from_json)[repeat.item] | float }}
     mode: single
+
     
 
 input_number:
@@ -170,4 +171,3 @@ input_number:
     max: 21
     step: 0.2
     unit_of_measurement: "°C"
-    
