@@ -127,13 +127,14 @@ automation:
             climate.oh_ruokatila: sensor.calibrated_olohuone_temperature
             climate.oh_tv: sensor.calibrated_olohuone_temperature
             climate.tyohuone: sensor.ruuvitag_6b98_temperature
+            climate.makuuhuone: sensor.ruuvitag_0d34_temperature
       - repeat:
           for_each: "{{ thermostats.keys() | list }}"
           sequence:
             - service: climate.set_temperature
               data:
                 entity_id: "{{ repeat.item }}"
-                temperature: "{{ state_attr('sensor.netatmo_pwm_ohjattu_lampotilas', repeat.item) | float(default=20) }}"
+                temperature: "{{ state_attr('sensor.netatmo_pwm_ohjattu_lampotila', repeat.item) | float(default=20) }}"
     mode: single
     
 
