@@ -12,7 +12,7 @@ template:
             'climate.tyohuone': {'sensor': 'sensor.ruuvitag_6b98_temperature', 'target': states('input_number.tyohuone_target') | float}
           } %}
           
-          {% set ns = namespace(results={}) %}
+          {% set results = {} %}
           {% for climate, data in thermostats.items() %}
             {% set current_temp = states(data.sensor) | float %}
             {% set target_temp = data.target | float %}
@@ -28,9 +28,9 @@ template:
               {% set pwm_temp = target_temp + 1.5 %}
             {% endif %}
             
-            {% set ns.results = ns.results | merge({climate: pwm_temp}) %}
+            {% set results = results | merge({climate: pwm_temp}) %}
           {% endfor %}
-          {{ ns.results }}
+          {{ results | tojson }}
 
 automation:
   - alias: "Päivitä Netatmo PWM lämpötilat"
@@ -38,12 +38,20 @@ automation:
       - platform: time_pattern
         minutes: "/3"
     action:
-      - service: climate.set_temperature
-        data_template:
-          entity_id: >
-            {{ thermostats.keys() | list }}
-          temperature: >
-            {{ states('sensor.netatmo_pwm_ohjattu_lampotila') }}
+      - variables:
+          thermostats:
+            climate.makuuhuone: sensor.ruuvitag_0d34_temperature
+            climate.oh_paaty: sensor.calibrated_olohuone_temperature
+            climate.oh_ruokatila: sensor.calibrated_olohuone_temperature
+            climate.oh_tv: sensor.calibrated_olohuone_temperature
+            climate.tyohuone: sensor.ruuvitag_6b98_temperature
+      - repeat:
+          for_each: "{{ thermostats.keys() | list }}"
+          sequence:
+            - service: climate.set_temperature
+              data:
+                entity_id: "{{ repeat.item }}"
+                temperature: "{{ state_attr('sensor.netatmo_pwm_ohjattu_lampotila', repeat.item) | float(default=20) }}"
     mode: single
 
 input_number:
