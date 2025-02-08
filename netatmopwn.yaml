@@ -15,15 +15,17 @@ template:
           {% set results = {} %}
           {% for climate, data in thermostats.items() %}
             {% set current_temp = states(data.sensor) | float %}
+            {% set previous_temp = states('sensor.' ~ climate.split('.')[1] ~ '_previous_temp') | float(current_temp) %}
             {% set target_temp = data.target | float %}
             {% set error = target_temp - current_temp %}
+            {% set temp_change = current_temp - previous_temp %}  # dT/dt arviointi
             
             {% if error < 0.2 %}
               {% set pwm_temp = target_temp %}
             {% elif error < 0.5 %}
-              {% set pwm_temp = target_temp + (0.5 if now().minute % 6 < 3 else -0.5) %}
+              {% set pwm_temp = target_temp + (0.5 if now().minute % 6 < (3 if temp_change <= 0 else 2) else -0.5) %}
             {% elif error < 1.5 %}
-              {% set pwm_temp = target_temp + (1.0 if now().minute % 6 < 3 else -1.0) %}
+              {% set pwm_temp = target_temp + (1.0 if now().minute % 6 < (3 if temp_change <= 0 else 2) else -1.0) %}
             {% else %}
               {% set pwm_temp = target_temp + 1.5 %}
             {% endif %}
@@ -45,6 +47,18 @@ automation:
           temperature: >
             {{ states('sensor.netatmo_pwm_ohjattu_lampotila') }}
     mode: single
+
+  - alias: "Päivitä Netatmo edellinen lämpötila"
+    trigger:
+      - platform: time_pattern
+        minutes: "/3"
+    action:
+      {% for climate, data in thermostats.items() %}
+      - service: input_number.set_value
+        data:
+          entity_id: input_number.{{ climate.split('.')[1] }}_previous_temp
+          value: "{{ states(data.sensor) | float }}"
+      {% endfor %}
 
 input_number:
   makuuhuone_target:
@@ -76,4 +90,35 @@ input_number:
     min: 17
     max: 21
     step: 0.2
+    unit_of_measurement: "°C"
+
+  makuuhuone_previous_temp:
+    name: "Makuuhuone Edellinen Lämpötila"
+    min: 0
+    max: 40
+    step: 0.1
+    unit_of_measurement: "°C"
+  oh_paaty_previous_temp:
+    name: "Olohuone Pääty Edellinen Lämpötila"
+    min: 0
+    max: 40
+    step: 0.1
+    unit_of_measurement: "°C"
+  oh_ruokatila_previous_temp:
+    name: "Olohuone Ruokatila Edellinen Lämpötila"
+    min: 0
+    max: 40
+    step: 0.1
+    unit_of_measurement: "°C"
+  oh_tv_previous_temp:
+    name: "Olohuone TV Edellinen Lämpötila"
+    min: 0
+    max: 40
+    step: 0.1
+    unit_of_measurement: "°C"
+  tyohuone_previous_temp:
+    name: "Työhuone Edellinen Lämpötila"
+    min: 0
+    max: 40
+    step: 0.1
     unit_of_measurement: "°C"
