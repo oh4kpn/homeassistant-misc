@@ -1,0 +1,79 @@
+# Netatmo PWM-pohjainen lämpötilansäätö (3min syklillä)
+
+template:
+  - sensor:
+      - name: "Netatmo PWM Ohjattu Lämpötila"
+        state: >
+          {% set thermostats = {
+            'climate.makuuhuone': {'sensor': 'sensor.ruuvitag_0d34_temperature', 'target': states('input_number.makuuhuone_target') | float},
+            'climate.oh_paaty': {'sensor': 'sensor.calibrated_olohuone_temperature', 'target': states('input_number.oh_paaty_target') | float},
+            'climate.oh_ruokatila': {'sensor': 'sensor.calibrated_olohuone_temperature', 'target': states('input_number.oh_ruokatila_target') | float},
+            'climate.oh_tv': {'sensor': 'sensor.calibrated_olohuone_temperature', 'target': states('input_number.oh_tv_target') | float},
+            'climate.tyohuone': {'sensor': 'sensor.ruuvitag_6b98_temperature', 'target': states('input_number.tyohuone_target') | float}
+          } %}
+          
+          {% set results = {} %}
+          {% for climate, data in thermostats.items() %}
+            {% set current_temp = states(data.sensor) | float %}
+            {% set target_temp = data.target | float %}
+            {% set error = target_temp - current_temp %}
+            
+            {% if error < 0.2 %}
+              {% set pwm_temp = target_temp %}
+            {% elif error < 0.5 %}
+              {% set pwm_temp = target_temp + (0.5 if now().minute % 6 < 3 else -0.5) %}
+            {% elif error < 1.5 %}
+              {% set pwm_temp = target_temp + (1.0 if now().minute % 6 < 3 else -1.0) %}
+            {% else %}
+              {% set pwm_temp = target_temp + 1.5 %}
+            {% endif %}
+            
+            {% set results = results.update({climate: pwm_temp}) %}
+          {% endfor %}
+          {{ results }}
+
+automation:
+  - alias: "Päivitä Netatmo PWM lämpötilat"
+    trigger:
+      - platform: time_pattern
+        minutes: "/3"
+    action:
+      - service: climate.set_temperature
+        data_template:
+          entity_id: >
+            {{ expand(states.climate) | selectattr('entity_id', 'in', thermostats.keys()) | map(attribute='entity_id') | list }}
+          temperature: >
+            {{ states('sensor.netatmo_pwm_ohjattu_lampotila') }}
+    mode: single
+
+input_number:
+  makuuhuone_target:
+    name: "Makuuhuone Tavoitelämpötila"
+    min: 17
+    max: 21
+    step: 0.2
+    unit_of_measurement: "°C"
+  oh_paaty_target:
+    name: "Olohuone Pääty Tavoitelämpötila"
+    min: 17
+    max: 21
+    step: 0.2
+    unit_of_measurement: "°C"
+  oh_ruokatila_target:
+    name: "Olohuone Ruokatila Tavoitelämpötila"
+    min: 17
+    max: 21
+    step: 0.2
+    unit_of_measurement: "°C"
+  oh_tv_target:
+    name: "Olohuone TV Tavoitelämpötila"
+    min: 17
+    max: 21
+    step: 0.2
+    unit_of_measurement: "°C"
+  tyohuone_target:
+    name: "Työhuone Tavoitelämpötila"
+    min: 17
+    max: 21
+    step: 0.2
+    unit_of_measurement: "°C"
