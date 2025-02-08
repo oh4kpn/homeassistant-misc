@@ -28,7 +28,8 @@ template:
               {% set pwm_temp = target_temp + 1.5 %}
             {% endif %}
             
-            {% set results = results | merge({climate: pwm_temp}) %}
+            {% set results = results.copy() %}
+            {% set _ = results.update({climate: pwm_temp}) %}
           {% endfor %}
           {{ results | tojson }}
 
