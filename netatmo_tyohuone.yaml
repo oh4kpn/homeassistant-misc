@@ -74,7 +74,7 @@
 # ---------------------------------------------------------------
 # - climate.tyohuone (Netatmo)
 # - RuuviTag lämpötila-anturi
-# - UPS-tehosensori (sensor.tyohuone_ups_power_watts)
+# - Tehosensori, esim. shelly tai ups (sensor.tyohuone_ups_power_watts)
 #
 # ---------------------------------------------------------------
 # TULOS
