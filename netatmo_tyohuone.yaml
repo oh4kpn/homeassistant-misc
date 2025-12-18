@@ -10,6 +10,7 @@
 # Säätö on optimoitu:
 # - vähäiseen oskillointiin
 # - hitaaseen lämpömassaan (patterilämmitys)
+# - muihin ulkoisiin tekijöihin, nyt talvelle ups:n kuorman mukaan aleneva pyyntö, keväällä ehkä otetaan aurinko mukaan leikkeihin
 # - Netatmon API:n ja venttiililogiiikan rajoitteisiin
 #
 # ---------------------------------------------------------------
