@@ -1,90 +1,93 @@
 # packages/netatmo_tyohuone.yaml
+# packages/netatmo_tyohuone.yaml
 #
-# TYÖHUONEEN EDISTYNYT LÄMMÖNSÄÄTÖ (PID + KASKADI + UPS-KOMPENSAATIO)
+# TYÖHUONEEN VAKAA JA HITAAMPI PID-POHJAINEN LÄMMÖNSÄÄTÖ
+# (RuuviTag + Netatmo + UPS-kuormakompensaatio)
 #
-# Tämä paketti toteuttaa Home Assistantissa Netatmo-termostaatille
-# ulkoisen, ohjelmallisen PID-säätimen käyttäen RuuviTag-lämpötila-anturia.
+# Tämä konfiguraatio toteuttaa Home Assistantissa maltillisesti
+# viritetyn PID-säätimen Netatmo-termostaatille käyttäen
+# RuuviTag-lämpötila-anturia todellisena mittauspisteenä.
 #
-# Kokonaisuus ohittaa Netatmon sisäisen "mustan laatikon" logiikan
-# ja käyttää Netatmoa vain venttiilin ohjausrajapintana.
-#
-# ---------------------------------------------------------------
-# PÄÄPERIAATE
-# ---------------------------------------------------------------
-# - RuuviTag mittaa todellisen huonelämpötilan
-# - Home Assistant laskee PID-säätimen avulla "virtuaalisen tavoitelämpötilan"
-# - Netatmolle EI anneta suoraan absoluuttista tavoitetta
-#   vaan sitä ohjataan kaskadina sen oman sisäisen lämpötilan kautta
-#
-# → Lopputulos: rauhallinen, ennakoiva ja hyvin säädettävä lämmönhallinta
+# Säätö on optimoitu:
+# - vähäiseen oskillointiin
+# - hitaaseen lämpömassaan (patterilämmitys)
+# - Netatmon API:n ja venttiililogiiikan rajoitteisiin
 #
 # ---------------------------------------------------------------
-# SISÄLTÖ
+# SUUNNITTELUFILOSOFIA
+# ---------------------------------------------------------------
+# Tämä EI pyri aggressiiviseen lämpötilan korjaukseen.
+# Tavoitteena on:
+# - tasainen lämpö
+# - minimaalinen venttiilin sahaus
+# - ennakoiva mutta rauhallinen reagointi
+#
+# Säätö perustuu kaskadiin:
+#   PID → virtuaalinen tavoitelämpö
+#       → Netatmon sisäinen lämpötila
+#       → venttiilin avautuminen
+#
+# ---------------------------------------------------------------
+# KOMPONENTIT
 # ---------------------------------------------------------------
 #
 # 1) PID-SÄÄDIN (P + I + D)
-#    - P (proportionaalinen): nopea reagointi virheeseen
-#    - I (integraali): poistaa pysyvän virheen (anti-windup mukana)
-#    - D (derivaatta): vaimentaa ylilyöntejä
+#    - P-Gain: pienempi kuin aiemmassa versiossa → vakaampi käytös
+#    - I-Gain: hidas integraali poistamaan pysyvä virhe
+#    - D-Gain: vaimentaa äkillisiä muutoksia
 #
-#    Kaikki gainit ovat säädettävissä UI-slidereilla lennossa.
+#    Kaikki parametrit ovat säädettävissä käyttöliittymästä
+#    ilman uudelleenkäynnistystä.
 #
-# 2) 10 MINUUTIN PAKKOSYKLI
-#    - Netatmo ei aina reagoi, jos setpoint ei muutu
-#    - Tässä ohjaus ajetaan väkisin 10 minuutin välein
-#    - Myös "sama arvo uudelleen" lähetetään Netatmolle
+# 2) INTEGRAALIN ANTI-WINDUP
+#    - Integraali ei kasva, jos Netatmon venttiili on jo ääriasennossa
+#    - Estää lämpötilan “karkaamisen” ja pitkän palautumisajan
 #
-# 3) KASKADIOHJAUS
-#    - PID laskee ideaalisen lämpötilan RuuviTagin perusteella
-#    - Muutos muunnetaan Netatmon sisäiseen asteikkoon
-#    - Yhden syklin muutos on rajoitettu ±0.5 °C
-#    - Lopullinen setpoint kvantisoidaan 0.5 °C askeliin
+# 3) UPS-POHJAINEN DYNAAMINEN KOMPENSAATIO
+#    - UPS:n tehonkulutus toimii hukkalämmön indikaattorina
+#    - Kuormitus laskee tavoitelämpötilaa lineaarisesti
+#    - Suodatettu 5 minuutin liukuvalla keskiarvolla
 #
-# 4) UPS-KUORMAPOHJAINEN DYNAAMINEN KOMPENSAATIO
-#    - UPS:n tehonkulutus indikoi työhuoneen hukkalämpöä
-#    - >200 W kuorma alkaa laskea tavoitelämpötilaa
-#    - Skaala: -0.1 °C / 100 W
-#    - Suodatettu 5 min liukuvalla keskiarvolla
+# 4) 10 MINUUTIN OHJAUSSILMUKKA
+#    - PID-laskenta ja Netatmo-ohjaus suoritetaan 10 min välein
+#    - Sopii patterilämmityksen hitaaseen dynamiikkaan
 #
-# 5) NETATMO-FEEDBACK
-#    - Luetaan Netatmon:
-#        * sisäinen lämpötila
-#        * venttiilin aukioloprosentti (heating_power_request)
-#    - Käytetään anti-windup-logiikassa ja diagnostiikassa
+# 5) KASKADIOHJAUS + SLEW RATE -RAJOITUS
+#    - Netatmon setpointia muutetaan vain vähän kerrallaan
+#    - Muutos per sykli on rajoitettu ±0.3…0.5 °C
+#    - Lopullinen arvo kvantisoidaan 0.5 °C askeliin
 #
 # ---------------------------------------------------------------
-# MIKSI TÄMÄ ON TARPEEN?
+# MIKSI TÄMÄ TOIMII NETATMON KANSSA
 # ---------------------------------------------------------------
-# Netatmon oma säätö:
-# - reagoi hitaasti
-# - käyttää väärää mittauspistettä (termostaatin sijainti)
-# - ei huomioi huoneen todellista lämpökuormaa
+# Netatmo:
+# - odottaa hitaita muutoksia
+# - ei pidä jatkuvasta sahaamisesta
+# - reagoi paremmin pieniin mutta säännöllisiin korjauksiin
 #
-# Tämä ratkaisu:
-# - mittaa lämpötilan oikeasta paikasta
-# - reagoi ennakoivasti
-# - on täysin läpinäkyvä ja säädettävä
-# - toimii vakaasti myös kuormituksen muuttuessa
+# Tämä konfiguraatio:
+# - "puhuu Netatmon kieltä"
+# - antaa sille aikaa reagoida
+# - mutta käyttää silti ulkoista, tarkempaa anturia
 #
 # ---------------------------------------------------------------
 # VAATIMUKSET
 # ---------------------------------------------------------------
-# - Home Assistant
-# - Netatmo climate entity (climate.tyohuone)
+# - climate.tyohuone (Netatmo)
 # - RuuviTag lämpötila-anturi
 # - UPS-tehosensori (sensor.tyohuone_ups_power_watts)
 #
 # ---------------------------------------------------------------
-# HUOMIO
+# TULOS
 # ---------------------------------------------------------------
-# Tämä EI ole "PID teoriassa" -konfiguraatio,
-# vaan käytännössä viritetty, Netatmoa kunnioittava
-# kaskadisäädin todelliseen asumiseen.
+# Lopputulos on rauhallinen, huomaamaton ja hyvin ennustettava
+# lämmönsäätö, joka toimii arjessa ilman jatkuvaa hienosäätöä.
+#
+# Tämä on tarkoituksella "hidas mutta viisas" säädin.
 #
 # Käytä, säädä ja riko rauhassa.
 #
-
-# packages/tyohuone_v3.yaml
+# packages/tyohuone_v2025-12-18.yaml
 
 input_number:
   tyohuone_target:
