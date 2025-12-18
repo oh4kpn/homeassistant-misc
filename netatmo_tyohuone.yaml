@@ -233,7 +233,7 @@ automation:
         data:
           value: "{{ current_temp }}"
 
-# --- 3. KASKADIOHJAUS (TIUKEMPI SLEW RATE 0.3°C) ---
+# --- 3. KASKADIOHJAUS (TIUKEMPI SLEW RATE 0.5°C) ---
   - alias: "Netatmo TempControl - Tyohuone (Slew Rate Limited)"
     id: netatmo_temp_control_tyohuone
     mode: single
@@ -248,7 +248,7 @@ automation:
       raw_target: "{{ netatmo_internal_temp + delta }}"
       current_setpoint: "{{ state_attr('climate.tyohuone', 'temperature') | float(21.0) }}"
       
-      # MUUTETTU: Tiukempi rajoitin 0.5 -> 0.3 estämään oskillointia
+      # MUUTETTU: Tiukempi rajoitin 0.5 estämään oskillointia
       diff: "{{ raw_target - current_setpoint }}"
       limited_diff: "{{ [[diff, -0.5] | max, 0.5] | min }}"
       
