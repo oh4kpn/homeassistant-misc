@@ -54,7 +54,6 @@
 #
 # 5) KASKADIOHJAUS + SLEW RATE -RAJOITUS
 #    - Netatmon setpointia muutetaan vain vähän kerrallaan
-#    - Muutos per sykli on rajoitettu ±0.3…0.5 °C
 #    - Lopullinen arvo kvantisoidaan 0.5 °C askeliin
 #
 # ---------------------------------------------------------------
