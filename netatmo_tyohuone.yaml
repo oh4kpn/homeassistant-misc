@@ -87,38 +87,15 @@
 #
 # Käytä, säädä ja riko rauhassa.
 #
-# packages/tyohuone_v2025-12-18.yaml
-
+# packages/tyohuone_v2025-12-21.yaml
 input_number:
   tyohuone_target:
-    name: "Tyohuone Tavoitelampotila"
+    name: "Työhuone Tavoitelämpötila"
     min: 17
     max: 22
     step: 0.1
     unit_of_measurement: "°C"
-    initial: 21.0
-  
-  tyokkari_kerroin_slider:
-    name: "Työhuone Kerroin (P-Gain)"
-    min: 1
-    max: 15
-    step: 0.1
-    initial: 2.0
-  
-  tyokkari_i_gain_slider:
-    name: "Työhuone I-Gain (Ki)"
-    min: 0.00
-    max: 0.10
-    step: 0.001
-    unit_of_measurement: "Ki"
-    initial: 0.004
-
-  tyohuone_d_gain_slider:
-    name: "Työhuone D-Gain (Kd)"
-    min: 0.0
-    max: 5.0
-    step: 0.1
-    initial: 1.0
+    initial: 20.0
 
   tyohuone_target_base:
     name: "Työhuone Base Lämpötila"
@@ -128,19 +105,41 @@ input_number:
     unit_of_measurement: "°C"
     initial: 21.0
 
+  tyokkari_kerroin_slider:
+    name: "Työhuone Kerroin (Kp)"
+    min: 1
+    max: 15
+    step: 0.1
+    initial: 4.0
+
+  tyokkari_i_gain_slider:
+    name: "Työhuone I-Gain (Ki)"
+    min: 0.00
+    max: 0.10
+    step: 0.001
+    unit_of_measurement: "Ki"
+    initial: 0.008
+
+  tyohuone_d_gain_slider:
+    name: "Työhuone D-Gain (Kd)"
+    min: 0.0
+    max: 10.0
+    step: 0.1
+    initial: 2.5
+
   tyokkari_integral_accumulator:
     name: "Työhuone I-Muisti"
-    min: -1.0
-    max: 1.0
+    min: -2.5
+    max: 2.5
     step: 0.0001
     initial: 0.0
 
-  tyohuone_error_storage:
-    name: "Työhuone Virhemuisti"
-    min: -5.0
-    max: 5.0
-    step: 0.001
-    initial: 0.0
+  tyohuone_last_temp:
+    name: "Työhuone Viime Lämpötila"
+    min: 0.0
+    max: 35.0
+    step: 0.01
+    initial: 21.0
 
 template:
   - sensor:
@@ -149,24 +148,10 @@ template:
         state: "{{ state_attr('climate.tyohuone', 'heating_power_request') | int(0) }}"
         icon: mdi:radiator-variant
 
-  - sensor:
-      - name: "Tyohuoneen PI-laskettu Lampotila"
-        unique_id: tyohuoneen_pi_laskettu_lampotila
+      - name: "Tyohuone PID Ohjausarvo"
         unit_of_measurement: "°C"
-        state: >
-          {% set current = states('sensor.ruuvitag_6b98_temperature') | float(21.0) %}
-          {% set target = states('input_number.tyohuone_target') | float(21.0) %}
-          {% set kp = states('input_number.tyokkari_kerroin_slider') | float(4.0) %}
-          {% set kd = states('input_number.tyohuone_d_gain_slider') | float(2.5) %}
-          {% set integral = states('input_number.tyokkari_integral_accumulator') | float(0) %}
-          {% set last_error = states('input_number.tyohuone_error_storage') | float(0) %}
-          
-          {% set error = target - current %}
-          {% set derivative = error - last_error %}
-          
-          {% set output = target + (kp * error) + integral + (kd * derivative) %}
-          
-          {{ ([16.0, output, 24.0] | sort)[1] | round(2) }}
+        state: "{{ state_attr('climate.tyohuone', 'temperature') }}"
+        icon: mdi:thermometer-lines
 
 sensor:
   - platform: filter
@@ -178,16 +163,12 @@ sensor:
         precision: 1
 
 automation:
-
-# --- 1. DYNAAMINEN TAVOITE (UPS KOMPENSOINTI) ---
-  - alias: "Työhuone: Dynaaminen Setpoint UPS-kuorman mukaan"
-    id: tyohuone_dynamic_setpoint_ups
-    mode: restart
+  # 1. UPS-KOMPENSAATIO (Laskee tavoitetta kun UPS kuormittuu)
+  - alias: "Työhuone: UPS Kompensointi"
+    id: tyohuone_ups_comp
     trigger:
       - platform: state
         entity_id: sensor.tyohuone_ups_teho_keskiarvo
-      - platform: state
-        entity_id: input_number.tyohuone_target_base
     action:
       - service: input_number.set_value
         target:
@@ -196,65 +177,69 @@ automation:
           value: >
             {% set base = states('input_number.tyohuone_target_base') | float(21.0) %}
             {% set power = states('sensor.tyohuone_ups_teho_keskiarvo') | float(0) %}
-            {% set compensation = (power / 200) * 0.1 %}
-            {{ (base - compensation) | round(2) }}
+            {% if power < 200 %}
+              {{ base }}
+            {% else %}
+              {{ (base - (power / 100) * 0.1) | round(2) }}
+            {% endif %}
 
-# --- 2. INTEGRAALIN PÄIVITYS (ANTI-WINDUP) ---
-  - alias: "Työhuone PID-Controller - Integral Kumulaatio"
-    id: tyohuone_pid_integral_update
+  # 2. PID-LASKENTA JA KASKADIOHJAUS (10 min sykli)
+  - alias: "Työhuone PID Controller Core"
+    id: tyohuone_pid_core
     mode: single
     trigger:
       - platform: time_pattern
-        minutes: "/10" 
+        minutes: "/10"
     action:
       - variables:
-          ki: "{{ states('input_number.tyokkari_i_gain_slider') | float(0.008) }}"
-          current_temp: "{{ states('sensor.ruuvitag_6b98_temperature') | float(21.0) }}"
-          target_temp: "{{ states('input_number.tyohuone_target') | float(21.0) }}"
-          old_i: "{{ states('input_number.tyokkari_integral_accumulator') | float(0) }}"
-          error: "{{ target_temp - current_temp }}"
+          target: "{{ states('input_number.tyohuone_target') | float }}"
+          current: "{{ states('sensor.ruuvitag_6b98_temperature') | float }}"
+          last_temp: "{{ states('input_number.tyohuone_last_temp') | float }}"
+          kp: "{{ states('input_number.tyokkari_kerroin_slider') | float }}"
+          ki: "{{ states('input_number.tyokkari_i_gain_slider') | float }}"
+          kd: "{{ states('input_number.tyohuone_d_gain_slider') | float }}"
+          old_i: "{{ states('input_number.tyokkari_integral_accumulator') | float }}"
           valve: "{{ state_attr('climate.tyohuone', 'heating_power_request') | int(0) }}"
 
+          # PID Lasku
+          error: "{{ target - current }}"
+          p_term: "{{ error * kp }}"
+          
+          # Asymmetrinen integraali (2x nopeampi jarrutus ylilämmölle)
+          effective_ki: "{% if error < 0 %}{{ ki * 2.0 }}{% else %}{{ ki }}{% endif %}"
+          new_i: >
+            {% if (valve >= 100 and error > 0) or (valve <= 0 and error < 0) %}
+              {{ old_i }}
+            {% else %}
+              {% set calc_i = old_i + (effective_ki * error * 10) %}
+              {{ [[calc_i, -2.5] | max, 2.5] | min | round(4) }}
+            {% endif %}
+
+          d_term: "{{ kd * (last_temp - current) }}"
+          pid_output: "{{ current + p_term + new_i + d_term }}"
+
+      # Päivitetään muuttujat
       - service: input_number.set_value
         target:
           entity_id: input_number.tyokkari_integral_accumulator
         data:
-          value: >
-            {# Anti-Windup: Pysäytetään integraali jos venttiili on jo ääriasennossa #}
-            {% if (valve >= 100 and error > 0) or (valve <= 0 and error < 0) %}
-              {{ old_i }}
-            {% else %}
-              {% set new_i = old_i + (ki * error * 10) %}
-              {{ [[new_i, -1.0] | max, 1.0] | min | round(4) }}
-            {% endif %}
+          value: "{{ new_i }}"
 
-      - service: input_number.set_value 
+      - service: input_number.set_value
         target:
-          entity_id: input_number.tyohuone_last_temp 
+          entity_id: input_number.tyohuone_last_temp
         data:
-          value: "{{ current_temp }}"
+          value: "{{ current }}"
 
-# --- 3. KASKADIOHJAUS (TIUKEMPI SLEW RATE 0.5°C) ---
-  - alias: "Netatmo TempControl - Tyohuone (Slew Rate Limited)"
-    id: netatmo_temp_control_tyohuone
-    mode: single
-    trigger:
-      - platform: time_pattern
-        minutes: "/10" 
-    variables:
-      pid_output: "{{ states('sensor.tyohuoneen_pi_laskettu_lampotila') | float(21.0) }}"
-      current_real: "{{ states('sensor.ruuvitag_6b98_temperature') | float(21.0) }}"
-      delta: "{{ pid_output - current_real }}"
-      netatmo_internal_temp: "{{ state_attr('climate.tyohuone', 'current_temperature') | float(21.0) }}"
-      raw_target: "{{ netatmo_internal_temp + delta }}"
-      current_setpoint: "{{ state_attr('climate.tyohuone', 'temperature') | float(21.0) }}"
-      
-      # MUUTETTU: Tiukempi rajoitin 0.5 estämään oskillointia
-      diff: "{{ raw_target - current_setpoint }}"
-      limited_diff: "{{ [[diff, -0.5] | max, 0.5] | min }}"
-      
-      final_temp: "{{ ((current_setpoint + limited_diff) * 2) | round(0) / 2 }}"
-    action:
+      # Kaskadiohjaus + Slew Rate (0.5°C)
+      - variables:
+          netatmo_internal: "{{ state_attr('climate.tyohuone', 'current_temperature') | float(current) }}"
+          current_setpoint: "{{ state_attr('climate.tyohuone', 'temperature') | float(current) }}"
+          delta: "{{ pid_output - current }}"
+          raw_target: "{{ netatmo_internal + delta }}"
+          limited_diff: "{{ [[(raw_target - current_setpoint), -0.5] | max, 0.5] | min }}"
+          final_temp: "{{ (([10.0, ((current_setpoint + limited_diff) * 2 | round(0) / 2), 25.0] | sort)[1]) | round(1) }}"
+
       - service: climate.set_temperature
         target:
           entity_id: climate.tyohuone
