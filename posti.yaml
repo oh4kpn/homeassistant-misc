@@ -1,7 +1,7 @@
 sensor:
   - platform: rest
     name: posti_jakelupaivat
-    resource: "https://www.posti.fi/maildelivery-api-proxy/?q=25410"
+    resource: "https://www.posti.fi/maildelivery-api-proxy/?q=33101"
     method: GET
     value_template: "{{ value_json[0].postalCode }}"
     json_attributes_path: "$[0]"
