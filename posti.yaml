@@ -1,0 +1,80 @@
+sensor:
+  - platform: rest
+    name: posti_jakelupaivat
+    resource: "https://www.posti.fi/maildelivery-api-proxy/?q=25410"
+    method: GET
+    value_template: "{{ value_json[0].postalCode }}"
+    json_attributes_path: "$[0]"
+    json_attributes:
+      - deliveryDates
+    scan_interval: 21600  # 6h, riittää hyvin
+
+
+template:
+  - sensor:
+
+      # 📬 Seuraava postinjakelupäivä
+      - name: "Posti – seuraava jakelupäivä"
+        state: >
+          {% set dates = state_attr('sensor.posti_jakelupaivat', 'deliveryDates') %}
+          {% if dates %}
+            {{ dates[0] }}
+          {% else %}
+            unknown
+          {% endif %}
+        device_class: date
+        
+      # 📬 Jaetaanko postia tänään?
+      - name: "Postia jaetaan tänään"
+        state: >
+          {% set today = now().date().isoformat() %}
+          {% set dates = state_attr('sensor.posti_jakelupaivat', 'deliveryDates') %}
+          {{ today in (dates or []) }}
+        icon: >
+          {% if is_state('sensor.postia_jaetaan_tanaan', 'True') %}
+            mdi:mailbox
+          {% else %}
+            mdi:mailbox-outline
+          {% endif %}
+
+      # ⏳ Päiviä seuraavaan jakeluun
+      - name: "Päiviä seuraavaan postiin"
+        unit_of_measurement: "pv"
+        state: >
+          {% set dates = state_attr('sensor.posti_jakelupaivat', 'deliveryDates') %}
+          {% if dates %}
+            {% set next = strptime(dates[0], '%Y-%m-%d').date() %}
+            {{ (next - now().date()).days }}
+          {% else %}
+            unknown
+          {% endif %}
+          
+  - binary_sensor:
+      - name: "Postia jaetaan tänään"
+        unique_id: posti_jaetaan_tanaan
+        state: >
+          {% set today = now().date().isoformat() %}
+          {% set dates = state_attr('sensor.posti_jakelupaivat', 'deliveryDates') %}
+          {{ today in (dates or []) }}
+        device_class: presence
+        icon: >
+          {% if this.state == 'on' %}
+            mdi:mailbox
+          {% else %}
+            mdi:mailbox-outline
+          {% endif %}
+
+
+automation:
+  - alias: "Posti jaetaan tänään"
+    trigger:
+      - platform: time
+        at: "08:00:00"
+    condition:
+      - condition: state
+        entity_id: sensor.postia_jaetaan_tanaan
+        state: "True"
+    action:
+      - service: notify.vainola
+        data:
+          message: "📬 Tänään jaetaan postia!"
