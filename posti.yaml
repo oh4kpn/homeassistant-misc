@@ -75,6 +75,6 @@ automation:
         entity_id: sensor.postia_jaetaan_tanaan
         state: "True"
     action:
-      - service: notify.vainola
+      - service: notify.pikkukakkonen
         data:
           message: "📬 Tänään jaetaan postia!"
