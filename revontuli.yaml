@@ -1,0 +1,30 @@
+automation:
+  - alias: "Hälytys: Revontulet näkyvissä"
+    description: "Ilmoittaa jos revontulia on ja taivas on selkeä"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.aurora_aurora_visibility_visibility
+        above: 49
+    condition:
+      - condition: and
+        conditions:
+          # 1. Onko aurinko laskenut? (Pimeää)
+          - condition: state
+            entity_id: sun.sun
+            state: "below_horizon"
+          # 2. Onko sää selkeä tai puolipilvinen?
+          - condition: template
+            value_template: >
+              {{ states('weather.forecast_home') in ['sunny', 'clear-night', 'partlycloudy'] }}
+          # 3. Estetään viestitulva (vähintään 2h edellisestä hälytyksestä)
+          - condition: template
+            value_template: >
+              {{ (as_timestamp(now()) - as_timestamp(state_attr('automation.halytys_revontulet_nakyvissa', 'last_triggered') | default(0))) > 7200 }}
+    action:
+      - service: notify.vainola
+        data:
+          title: "🌌 Revontulihälytys!"
+          message: >
+            Nyt kannattaa katsoa taivaalle! 
+            Näkyvyysennuste: {{ states('sensor.aurora_aurora_visibility_visibility') }}% 
+            Sää: {{ states('weather.forecast_home') }}.
