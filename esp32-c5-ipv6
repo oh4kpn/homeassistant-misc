@@ -1,0 +1,71 @@
+substitutions:
+  node_name: c5-testing
+  friendly_name: "C5 Testing"
+
+esphome:
+  name: ${node_name}
+  friendly_name: ${friendly_name}
+  platformio_options:
+    build_flags: "-DASYNC_TCP_SSL_ENABLED=1"
+
+esp32:
+  board: esp32-c5-devkitc-1
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_LWIP_IPV6: "y"
+      CONFIG_LWIP_IPV6_AUTOCONFIG: "y"
+#      CONFIG_LWIP_IPV4: "n"           # Poistaa IPv4-tuen LWIP:stä - kommentoitu, jätetään nää ny vielä varmuudeks päälle ja disabloidaan vain kyseisestä vlanista
+#      CONFIG_LWIP_DHCP: "n"           # Estää IPv4 DHCP:n pyynnöt  - kommentoitu, jätetään nää ny vielä varmuudeks päälle ja disabloidaan vain kyseisestä vlanista
+
+wifi:
+  power_save_mode: none
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: false
+
+# --- Pakettien include otakey, apikey ja sntp ---
+packages:
+  - !include common/otaapi.yaml
+  - !include common/time.yaml
+
+# --- BLE + proxy ---
+esp32_ble:
+  # scanning aktivoitu automaattisesti proxylla
+bluetooth_proxy:
+
+# --- Ruuvi BLE sensorit ---
+ruuvi_ble: # kommentoi pois jos haluat että menee homassarille asti raakana
+
+# --- Logger ---
+logger:
+  level: VERY_VERBOSE
+  baud_rate: 0   # ei UART, vain API/Telnet
+
+# Aktivoidaan IPv6 verkkoasetuksissa
+network:
+  enable_ipv6: true
+  # Odotetaan, että laite saa vähintään Link-Local (fe80::) 
+  # ja Global-osoitteen ennen kuin yhteys katsotaan valmiiksi.
+  min_ipv6_addr_count: 2
+
+text_sensor:
+
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IPv4 Osoite"
+
+  - platform: template
+    name: "${friendly_name} IPv6 Osoitteet"
+    id: ipv6_addresses
+    icon: "mdi:ip-network"
+    update_interval: 60s
+    lambda: |-
+      std::string addresses = "";
+      for (auto const& addr : network::get_ip_addresses()) {
+        if (addr.is_ip6()) {
+          if (!addresses.empty()) addresses += ", ";
+          addresses += addr.str(); // ESPHomen vakio tapa muuttaa IP merkkijonoksi
+        }
+      }
+      return addresses;
