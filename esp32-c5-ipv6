@@ -1,3 +1,5 @@
+#esp32-c5 - esphomen kautta homeassistanttiin - ipv6 päällä, ipv4 kans jos se on vlanille jätetty päälle - kaupanpäälle kaks text sensoria jotka kertoo homeassistantille iipeen, ota, api ja ntp asetukset puuttuu tästä, ne luetaan packagesina
+
 substitutions:
   node_name: c5-testing
   friendly_name: "C5 Testing"
