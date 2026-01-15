@@ -27,7 +27,7 @@ wifi:
 # --- Pakettien include otakey, apikey ja sntp ---
 packages:
   - !include common/otaapi.yaml
-  - !include common/time.yaml
+  - !include common/time.yaml # muistakki että tarviaa (s)ntp asetuksissa olla myös ipv6 kelpoisaa
 
 # --- BLE + proxy ---
 esp32_ble:
