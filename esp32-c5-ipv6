@@ -8,6 +8,7 @@ esphome:
   name: ${node_name}
   friendly_name: ${friendly_name}
   platformio_options:
+    # SSL/TLS (TLS 1.2/1.3) tuki TCP-yhteyksille on käytössä:
     build_flags: "-DASYNC_TCP_SSL_ENABLED=1"
 
 esp32:
@@ -33,16 +34,18 @@ packages:
 
 # --- BLE + proxy ---
 esp32_ble:
-  # scanning aktivoitu automaattisesti proxylla
+# scanning aktivoitu automaattisesti proxylla
 bluetooth_proxy:
 
 # --- Ruuvi BLE sensorit ---
-ruuvi_ble: # kommentoi pois jos haluat että menee homassarille asti raakana
+# kommentoi pois jos haluat että menee homassarille asti raakana
+ruuvi_ble: 
 
 # --- Logger ---
 logger:
   level: VERY_VERBOSE
-  baud_rate: 0   # ei UART, vain API/Telnet
+  # ei UART, vain API/Telnet
+  baud_rate: 0   
 
 # Aktivoidaan IPv6 verkkoasetuksissa
 network:
@@ -67,7 +70,7 @@ text_sensor:
       for (auto const& addr : network::get_ip_addresses()) {
         if (addr.is_ip6()) {
           if (!addresses.empty()) addresses += ", ";
-          addresses += addr.str(); // ESPHomen vakio tapa muuttaa IP merkkijonoksi
+          addresses += addr.str(); // ESPHomen tapa muuttaa IP merkkijonoksi
         }
       }
       return addresses;
