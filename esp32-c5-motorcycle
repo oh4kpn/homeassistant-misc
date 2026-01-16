@@ -1,0 +1,192 @@
+substitutions:
+  node_name: c5-transalp-xl700v
+  friendly_name: "C5 Transalp"
+  # Käytetään GPIO1:tä akun mittaukseen (ADC)
+  battery_pin: "GPIO1"
+  # Jos vastusjakaja on esim. 100k ja 22k, kerroin on n. 5.54
+  voltage_multiplier: "5.54"
+
+esphome:
+  name: ${node_name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32-c5-devkitc-1
+  framework:
+    type: esp-idf
+
+# Aktivoidaan Bluetooth Proxy (kätevä tallissa muiden laitteiden seurantaan)
+esp32_ble:
+bluetooth_proxy:
+
+# --- Verkkoyhteydet ---
+packages:
+  - !include common/wifi5.yaml      # 5GHz tuki
+  - !include common/otaapi.yaml
+  - !include common/time.yaml
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: INFO # VERBOSE vain debuggaukseen, jottei UART tukkeudu
+
+wireguard:
+  address: 10.120.69.11
+  private_key: "kurppa0"
+  peer_public_key: "kurppa1"
+  peer_preshared_key: "kurppa2"
+  peer_endpoint: "kurppa3"
+  peer_port: 51821
+  peer_allowed_ips: [0.0.0.0/0]
+  peer_persistent_keepalive: 20s
+
+# --- Väylät ---
+uart:
+  - id: gps_uart
+    tx_pin: GPIO5 # Vaihdettu pois ADC-pinneistä
+    rx_pin: GPIO4 # Vaihdettu pois ADC-pinneistä
+    baud_rate: 9600
+
+i2c:
+  sda: GPIO8
+  scl: GPIO9
+  scan: true
+  id: bus_a
+
+one_wire:
+  - platform: gpio
+    pin: GPIO2
+
+# --- Sensorit ---
+sensor:
+  # 1. KIIHTYVYYS JA KALLISTUS (MPU-6050)
+  - platform: mpu6050
+    address: 0x68
+    accel_x:
+      id: acc_x
+      name: "${friendly_name} Kiihtyvyys X"
+    accel_y:
+      id: acc_y
+      name: "${friendly_name} Kiihtyvyys Y"
+    accel_z:
+      id: acc_z
+      name: "${friendly_name} Kiihtyvyys Z"
+    update_interval: 100ms
+
+  - platform: template
+    name: "${friendly_name} Kallistuskulma"
+    unit_of_measurement: "°"
+    icon: "mdi:axis-z-rotate-clockwise"
+    accuracy_decimals: 1
+    lambda: |-
+      return (atan2(id(acc_y).state, id(acc_z).state) * 180.0 / M_PI);
+    update_interval: 200ms
+    filters:
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 1
+
+  # 2. AKUN VALVONTA (12V Lyijyakku)
+  - platform: adc
+    pin: ${battery_pin}
+    name: "${friendly_name} Akun jännite"
+    id: battery_voltage
+    update_interval: 30s
+    attenuation: 12db
+    unit_of_measurement: "V"
+    filters:
+      - multiply: ${voltage_multiplier}
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+
+  - platform: template
+    name: "${friendly_name} Akun varaus"
+    unit_of_measurement: "%"
+    device_class: battery
+    update_interval: 60s
+    lambda: |-
+      float v = id(battery_voltage).state;
+      if (v >= 12.7) return 100.0;
+      if (v <= 11.5) return 0.0;
+      return (v - 11.5) / (12.7 - 11.5) * 100.0;
+
+  # 3. LÄMPÖTILAT (DS18B20)
+  # HUOM: Aja ensin ilman osoitteita ja kopioi ID:t logeista tähän
+  - platform: dallas_temp
+    address: 0x2100000012345628
+    name: "${friendly_name} Öljyn lämpötile"
+  
+  - platform: dallas_temp
+    address: 0x4200000065432128
+    name: "${friendly_name} Jäähdytysnesteen lämpötila"
+
+  - platform: dallas_temp
+    address: 0x4200000065432129
+    name: "${friendly_name} Ulkoilman lämpötila"
+
+  # 4. GPS TIEDOT
+  - platform: gps
+    gps_id: my_gps
+    speed:
+      name: "${friendly_name} Nopeus"
+      unit_of_measurement: "km/h"
+      filters: [- multiply: 3.6]
+    satellites:
+      name: "${friendly_name} Satelliitit"
+
+# --- GPS Sijainti ja Aika ---
+gps:
+  id: my_gps
+  uart_id: gps_uart
+  time_id: gps_time
+
+time:
+  - platform: gps
+    id: gps_time
+  - platform: sntp
+    id: sntp_time
+
+# --- Merkkivalo (Internal RGB) ---
+light:
+  - platform: esp32_rmt_led_strip
+    id: internal_rgb
+    pin: GPIO27
+    num_leds: 1
+    rgb_order: RGB
+    variant: ESP32C5
+    effects:
+      - pulse: {name: "Pulse Red", transition_length: 1s, update_interval: 1s}
+      - pulse: {name: "Pulse Green", transition_length: 2s, update_interval: 2s}
+      - pulse: {name: "Pulse Blue", transition_length: 5s, update_interval: 5s}
+
+# --- Logiikka ledille ---
+interval:
+  - interval: 10s
+    then:
+      - lambda: |-
+          auto call = id(internal_rgb).turn_on();
+          if (!network::is_connected()) {
+            call.set_effect("Pulse Red");
+          } else if (id(gps_time).now().is_valid()) {
+            call.set_effect("Pulse Blue");
+          } else {
+            call.set_effect("Pulse Green");
+          }
+          call.perform();
+
+# --- Diagnostiikka HA:han ---
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP"
+  - platform: template
+    name: "${friendly_name} IPv6"
+    lambda: |-
+      std::string addrs = "";
+      for (auto const& addr : network::get_ip_addresses()) {
+        if (addr.is_ip6()) {
+          if (!addrs.empty()) addrs += ", ";
+          addrs += addr.str();
+        }
+      }
+      return addrs;
