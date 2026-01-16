@@ -74,3 +74,12 @@ text_sensor:
         }
       }
       return addresses;
+
+# --- TODO: tuleva Thread / Matter ---
+# Tämä block on valmiina: C5 voi toimia controllerina myöhemmin
+# thread:
+#   network_name: "langatonlankaverkko"
+#   master_key: "0123456789abcdef0123456789abcdef"
+#   extended_pan_id: "0011223344556677"
+#   channel: 15
+#   border_router: true
