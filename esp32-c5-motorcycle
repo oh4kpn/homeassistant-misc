@@ -23,18 +23,17 @@ bluetooth_proxy:
 packages:
   - !include common/wifi5.yaml      # 5GHz tuki
   - !include common/otaapi.yaml
-  - !include common/time.yaml
 
 logger:
   hardware_uart: USB_SERIAL_JTAG
   level: INFO # VERBOSE vain debuggaukseen, jottei UART tukkeudu
 
 wireguard:
-  address: 10.120.69.11
-  private_key: "kurppa0"
-  peer_public_key: "kurppa1"
-  peer_preshared_key: "kurppa2"
-  peer_endpoint: "kurppa3"
+  address: kurppa1
+  private_key: "kurppa2"
+  peer_public_key: "kurppa3"
+  peer_preshared_key: "kurppa4"
+  peer_endpoint: "kurppa5"
   peer_port: 51821
   peer_allowed_ips: [0.0.0.0/0]
   peer_persistent_keepalive: 20s
@@ -42,8 +41,8 @@ wireguard:
 # --- Väylät ---
 uart:
   - id: gps_uart
-    tx_pin: GPIO5 # Vaihdettu pois ADC-pinneistä
-    rx_pin: GPIO4 # Vaihdettu pois ADC-pinneistä
+    tx_pin: GPIO5
+    rx_pin: GPIO4
     baud_rate: 9600
 
 i2c:
@@ -54,7 +53,7 @@ i2c:
 
 one_wire:
   - platform: gpio
-    pin: GPIO2
+    pin: GPIO3
 
 # --- Sensorit ---
 sensor:
@@ -114,65 +113,42 @@ sensor:
   # HUOM: Aja ensin ilman osoitteita ja kopioi ID:t logeista tähän
   - platform: dallas_temp
     address: 0x2100000012345628
-    name: "${friendly_name} Öljyn lämpötile"
+    name: "${friendly_name} Öljyn lämpö"
   
   - platform: dallas_temp
     address: 0x4200000065432128
-    name: "${friendly_name} Jäähdytysnesteen lämpötila"
+    name: "${friendly_name} Jäähdytysneste meno"
 
   - platform: dallas_temp
     address: 0x4200000065432129
-    name: "${friendly_name} Ulkoilman lämpötila"
+    name: "${friendly_name} Ulkoilman lämpö"
 
-  # 4. GPS TIEDOT
-  - platform: gps
-    gps_id: my_gps
-    speed:
-      name: "${friendly_name} Nopeus"
-      unit_of_measurement: "km/h"
-      filters: [- multiply: 3.6]
-    satellites:
-      name: "${friendly_name} Satelliitit"
-
-# --- GPS Sijainti ja Aika ---
 gps:
   id: my_gps
   uart_id: gps_uart
-  time_id: gps_time
+  # time_id POISTETTU TÄSTÄ
+  speed:
+    name: "${friendly_name} Nopeus"
+    unit_of_measurement: "km/h"
+    filters:
+      - multiply: 3.6
+  latitude:
+    name: "${friendly_name} Leveysaste"
+  longitude:
+    name: "${friendly_name} Pituusaste"
+  altitude:
+    name: "${friendly_name} Korkeus"
+  satellites:
+    name: "${friendly_name} Satelliitit"
 
 time:
   - platform: gps
     id: gps_time
+    # TÄSSÄ määritellään mistä kello saa aikansa
+    gps_id: my_gps
   - platform: sntp
     id: sntp_time
 
-# --- Merkkivalo (Internal RGB) ---
-light:
-  - platform: esp32_rmt_led_strip
-    id: internal_rgb
-    pin: GPIO27
-    num_leds: 1
-    rgb_order: RGB
-    variant: ESP32C5
-    effects:
-      - pulse: {name: "Pulse Red", transition_length: 1s, update_interval: 1s}
-      - pulse: {name: "Pulse Green", transition_length: 2s, update_interval: 2s}
-      - pulse: {name: "Pulse Blue", transition_length: 5s, update_interval: 5s}
-
-# --- Logiikka ledille ---
-interval:
-  - interval: 10s
-    then:
-      - lambda: |-
-          auto call = id(internal_rgb).turn_on();
-          if (!network::is_connected()) {
-            call.set_effect("Pulse Red");
-          } else if (id(gps_time).now().is_valid()) {
-            call.set_effect("Pulse Blue");
-          } else {
-            call.set_effect("Pulse Green");
-          }
-          call.perform();
 
 # --- Diagnostiikka HA:han ---
 text_sensor:
