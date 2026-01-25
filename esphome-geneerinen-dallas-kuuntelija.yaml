@@ -87,9 +87,22 @@ sensor:
         - homeassistant.event:
             event: esphome.dallas_raw
             data:
+              protocol_version: "0.1"
               address: !lambda 'return id(temp_sensor_0).get_address_name();'
               value: !lambda 'return x;'
-              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+              timestamp: !lambda |-
+                char buf[32];
+                time_t t = id(sntp_time).now().timestamp;
+                struct tm ts;
+                gmtime_r(&t, &ts);
+                snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                         ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday,
+                         ts.tm_hour, ts.tm_min, ts.tm_sec);
+                return std::string(buf);
+              source_data: !lambda |-
+                char buf[64];
+                snprintf(buf, sizeof(buf), "id=%s,index=%d", id(temp_sensor_0).get_name().c_str(), 0);
+                return std::string(buf);
 
   # ==================================================
   # Dallas-anturi 1
@@ -103,9 +116,22 @@ sensor:
         - homeassistant.event:
             event: esphome.dallas_raw
             data:
+              protocol_version: "0.1"
               address: !lambda 'return id(temp_sensor_1).get_address_name();'
               value: !lambda 'return x;'
-              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+              timestamp: !lambda |-
+                char buf[32];
+                time_t t = id(sntp_time).now().timestamp;
+                struct tm ts;
+                gmtime_r(&t, &ts);
+                snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                         ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday,
+                         ts.tm_hour, ts.tm_min, ts.tm_sec);
+                return std::string(buf);
+              source_data: !lambda |-
+                char buf[64];
+                snprintf(buf, sizeof(buf), "id=%s,index=%d", id(temp_sensor_1).get_name().c_str(), 1);
+                return std::string(buf);
 
   # ==================================================
   # Dallas-anturi 2
@@ -119,9 +145,22 @@ sensor:
         - homeassistant.event:
             event: esphome.dallas_raw
             data:
+              protocol_version: "0.1"
               address: !lambda 'return id(temp_sensor_2).get_address_name();'
               value: !lambda 'return x;'
-              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+              timestamp: !lambda |-
+                char buf[32];
+                time_t t = id(sntp_time).now().timestamp;
+                struct tm ts;
+                gmtime_r(&t, &ts);
+                snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                         ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday,
+                         ts.tm_hour, ts.tm_min, ts.tm_sec);
+                return std::string(buf);
+              source_data: !lambda |-
+                char buf[64];
+                snprintf(buf, sizeof(buf), "id=%s,index=%d", id(temp_sensor_2).get_name().c_str(), 2);
+                return std::string(buf);
 
   # ==================================================
   # Dallas-anturi 3
@@ -135,9 +174,22 @@ sensor:
         - homeassistant.event:
             event: esphome.dallas_raw
             data:
+              protocol_version: "0.1"
               address: !lambda 'return id(temp_sensor_3).get_address_name();'
               value: !lambda 'return x;'
-              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+              timestamp: !lambda |-
+                char buf[32];
+                time_t t = id(sntp_time).now().timestamp;
+                struct tm ts;
+                gmtime_r(&t, &ts);
+                snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                         ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday,
+                         ts.tm_hour, ts.tm_min, ts.tm_sec);
+                return std::string(buf);
+              source_data: !lambda |-
+                char buf[64];
+                snprintf(buf, sizeof(buf), "id=%s,index=%d", id(temp_sensor_3).get_name().c_str(), 3);
+                return std::string(buf);
 
   # ==================================================
   # Dallas-anturi 4
@@ -151,9 +203,22 @@ sensor:
         - homeassistant.event:
             event: esphome.dallas_raw
             data:
+              protocol_version: "0.1"
               address: !lambda 'return id(temp_sensor_4).get_address_name();'
               value: !lambda 'return x;'
-              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+              timestamp: !lambda |-
+                char buf[32];
+                time_t t = id(sntp_time).now().timestamp;
+                struct tm ts;
+                gmtime_r(&t, &ts);
+                snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                         ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday,
+                         ts.tm_hour, ts.tm_min, ts.tm_sec);
+                return std::string(buf);
+              source_data: !lambda |-
+                char buf[64];
+                snprintf(buf, sizeof(buf), "id=%s,index=%d", id(temp_sensor_4).get_name().c_str(), 4);
+                return std::string(buf);
 
   # ==================================================
   # Dallas-anturi 5
@@ -167,9 +232,22 @@ sensor:
         - homeassistant.event:
             event: esphome.dallas_raw
             data:
+              protocol_version: "0.1"
               address: !lambda 'return id(temp_sensor_5).get_address_name();'
               value: !lambda 'return x;'
-              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+              timestamp: !lambda |-
+                char buf[32];
+                time_t t = id(sntp_time).now().timestamp;
+                struct tm ts;
+                gmtime_r(&t, &ts);
+                snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                         ts.tm_year + 1900, ts.tm_mon + 1, ts.tm_mday,
+                         ts.tm_hour, ts.tm_min, ts.tm_sec);
+                return std::string(buf);
+              source_data: !lambda |-
+                char buf[64];
+                snprintf(buf, sizeof(buf), "id=%s,index=%d", id(temp_sensor_5).get_name().c_str(), 5);
+                return std::string(buf);
 
 
 # ==================================================
