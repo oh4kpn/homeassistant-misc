@@ -1,0 +1,194 @@
+# kayta tata yhdessa dallas-kuuntelija.yamlin kaa
+substitutions:
+  node_name: 2026-vilp-1
+  friendly_name: "2026 Vilp 1"
+  dallas_pin: "GPIO23"
+  
+packages:
+  wifi: !include common/wifi.yaml
+  otaapi: !include common/otaapi.yaml
+
+esphome:
+  name: ${node_name}
+  friendly_name: ${friendly_name}
+
+one_wire:
+  - platform: gpio
+    pin: ${dallas_pin}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_LWIP_IPV6: "y"
+      CONFIG_LWIP_IPV6_AUTOCONFIG: "y"
+
+# Aktivoidaan IPv6
+network:
+  enable_ipv6: true
+  
+# Aktivoidaan BLE ja BT
+esp32_ble:
+bluetooth_proxy:
+
+# Aktivoidaan logger
+logger:
+  level: INFO
+
+# Aktivoidaan debug moodi
+debug:
+
+# ==================================================
+# Hupisensorit ESP32
+# ==================================================
+
+text_sensor:
+  # IPv4
+  - platform: template
+    name: "IPv4"
+    id: ipv4_address
+    lambda: |-
+      // etsitään ensimmäinen IPv4 osoite
+      for (auto const& addr : network::get_ip_addresses()) {
+        if (!addr.is_ip6()) return addr.str();
+      }
+      return std::string("0.0.0.0");
+
+  # IPv6
+  - platform: template
+    name: "IPv6"
+    id: ipv6_addresses
+    icon: "mdi:ip-network"
+    lambda: |-
+      std::string addresses = "";
+      for (auto const& addr : network::get_ip_addresses()) {
+        if (addr.is_ip6()) {
+          if (!addresses.empty()) addresses += ", ";
+          addresses += addr.str();
+        }
+      }
+      return addresses;
+
+# ==================================================
+# Dallas-anturit - RAW 64-bit HEX HA-event
+# ==================================================
+
+sensor:
+  # ==================================================
+  # Dallas-anturi 0
+  - platform: dallas_temp
+    index: 0
+    id: temp_sensor_0
+    update_interval: never
+    internal: true
+    on_value:
+      then:
+        - homeassistant.event:
+            event: esphome.dallas_raw
+            data:
+              address: !lambda 'return id(temp_sensor_0).get_address_name();'
+              value: !lambda 'return x;'
+              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+
+  # ==================================================
+  # Dallas-anturi 1
+  - platform: dallas_temp
+    index: 1
+    id: temp_sensor_1
+    update_interval: never
+    internal: true
+    on_value:
+      then:
+        - homeassistant.event:
+            event: esphome.dallas_raw
+            data:
+              address: !lambda 'return id(temp_sensor_1).get_address_name();'
+              value: !lambda 'return x;'
+              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+
+  # ==================================================
+  # Dallas-anturi 2
+  - platform: dallas_temp
+    index: 2
+    id: temp_sensor_2
+    update_interval: never
+    internal: true
+    on_value:
+      then:
+        - homeassistant.event:
+            event: esphome.dallas_raw
+            data:
+              address: !lambda 'return id(temp_sensor_2).get_address_name();'
+              value: !lambda 'return x;'
+              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+
+  # ==================================================
+  # Dallas-anturi 3
+  - platform: dallas_temp
+    index: 3
+    id: temp_sensor_3
+    update_interval: never
+    internal: true
+    on_value:
+      then:
+        - homeassistant.event:
+            event: esphome.dallas_raw
+            data:
+              address: !lambda 'return id(temp_sensor_3).get_address_name();'
+              value: !lambda 'return x;'
+              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+
+  # ==================================================
+  # Dallas-anturi 4
+  - platform: dallas_temp
+    index: 4
+    id: temp_sensor_4
+    update_interval: never
+    internal: true
+    on_value:
+      then:
+        - homeassistant.event:
+            event: esphome.dallas_raw
+            data:
+              address: !lambda 'return id(temp_sensor_4).get_address_name();'
+              value: !lambda 'return x;'
+              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+
+  # ==================================================
+  # Dallas-anturi 5
+  - platform: dallas_temp
+    index: 5
+    id: temp_sensor_5
+    update_interval: never
+    internal: true
+    on_value:
+      then:
+        - homeassistant.event:
+            event: esphome.dallas_raw
+            data:
+              address: !lambda 'return id(temp_sensor_5).get_address_name();'
+              value: !lambda 'return x;'
+              timestamp: !lambda 'return std::to_string(id(sntp_time).now().timestamp);'
+
+
+# ==================================================
+# Pollaus: päivitetään kaikki 30s välein
+# ==================================================
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: "EET-2EEST,M3.5.0/3,M10.5.0/4"
+    servers:
+      - ntp-ext.prepay.fi
+      - pool.ntp.prepay.fi
+      - ntp.netnod.se
+    on_time:
+      - seconds: /30
+        then:
+          - component.update: temp_sensor_0
+          - component.update: temp_sensor_1
+          - component.update: temp_sensor_2
+          - component.update: temp_sensor_3
+          - component.update: temp_sensor_4
+          - component.update: temp_sensor_5
