@@ -76,13 +76,10 @@ sensor:
     index: 0
     id: b1_i0
     name: "Väylä 1 Anturi 0"
-    update_interval: 30s
+    # Käytetään substituutiota tässä:
+    update_interval: ${temp_update_interval}
     filters:
       - filter_out: nan
-      - filter_out: 0.0    # Suodatetaan virheelliset nollat
-      - filter_out: 85.0   # Dallasin tyypillinen virhearvo (Power-on reset)
-      - filter_out: -127.0 # Yhteysvirhe
-      # muut havaitut virhetilanteet poistettu tietotorvasyistä
     on_value:
       then:
         - if:
@@ -91,7 +88,7 @@ sensor:
             then:
               - script.execute:
                   id: send_dallas_event
-                  sensor_address: !lambda "return this->get_address_name();"
+                  sensor_address: !lambda "return id(b1_i0).get_address_name();"
                   sensor_value: !lambda "return x;"
 
   # Toistetaan sama rakenne muille antureille... index: korotus +1, id: b1 = ow_bus_1 _i0 korotus +1 name: korotus +1
