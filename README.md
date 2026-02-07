@@ -3,7 +3,7 @@
 # dallas geneerinen kuuntelija hirviö:
 
 
-# 🌡️ Kellarin OneWire-Hirviö (v1.1)
+# 🌡️ Kellarin OneWire-Hirviö (v1.1) - dallas-kuuntelija.yaml
 
 Tämä projekti on dedikoitu ESP32-pohjaiselle OneWire-hubille, joka hallitsee useampaa fyysistä väylää ja yhteensä useampia DS18B20-lämpötila-anturia. Projekti on suunniteltu Hämylän varaajahuoneen ja kellaritilojen tinkimättömään valvontaan.
 
