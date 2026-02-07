@@ -25,7 +25,7 @@ time:
     id: sntp_time
     timezone: "UTC"  # Pakotetaan laite elämään UTC-ajassa
     servers:
-      # vain julkiset, tietoturvasyistä)
+      # vain julkiset, tietoturvasyistä
       - ntp.netnod.se
 
 script:
@@ -91,7 +91,7 @@ sensor:
             then:
               - script.execute:
                   id: send_dallas_event
-                  sensor_address: !lambda "return id(b1_i0).get_address_name();"
+                  sensor_address: !lambda "return this->get_address_name();"
                   sensor_value: !lambda "return x;"
 
   # Toistetaan sama rakenne muille antureille... index: korotus +1, id: b1 = ow_bus_1 _i0 korotus +1 name: korotus +1
