@@ -25,6 +25,7 @@ time:
     id: sntp_time
     timezone: "EET-2EEST,M3.5.0/3,M10.5.0/4"
     servers:
+      # vain julkiset, tietoturvasyistä)
       - ntp.netnod.se
 
 # =============================================================================
@@ -65,9 +66,10 @@ sensor:
       - filter_out: 0.0    # Suodatetaan virheelliset nollat
       - filter_out: 85.0   # Dallasin tyypillinen virhearvo (Power-on reset)
       - filter_out: -127.0 # Yhteysvirhe
+      # muut havaitut virhetilanteet poistettu tietotorvasyistä
     on_value:
       then:
-        - delay: 200ms
+        - delay: 200ms # Jos cpu on joskus kiireinen, eikä heti kerkiäkään tehdä oikeita töitä
         - if:
             condition:
               lambda: 'return !std::isnan(x);'
@@ -79,5 +81,5 @@ sensor:
                     value: !lambda 'return str_sprintf("%.2f", x);'
                     hub: kellari-onewire-hub-1
 
-  # Toistetaan sama rakenne muille antureille...
-  # (Konfiguraatio jatkuu vastaavalla tavalla väylille 1-3)
+  # Toistetaan sama rakenne muille antureille... index: korotus +1, id: b1 = ow_bus_1 _i0 korotus +1 name: korotus +1
+  # (Konfiguraatio jatkuu vastaavalla tavalla väylille 1-8 (esim. ow_bus_1, ow_bus_2, ow_bus_3...)
