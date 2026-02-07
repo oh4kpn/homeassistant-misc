@@ -80,7 +80,7 @@ sensor:
                     address: !lambda 'return id(b1_i0).get_address_name();'
                     value: !lambda 'return str_sprintf("%.2f", x);'
                     hub: kellari-onewire-hub-1
-                    measured_at: !lambda 'return id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S");' # pyöristetty tietoturvasyistä
+                    measured_at: !lambda 'return id(sntp_time).now().strftime("%Y-%m-%dT%H:%M:%S%z");' # ISO 8601 formaatti, pyöristys tietoturvasyistä poistettu
 
   # Toistetaan sama rakenne muille antureille... index: korotus +1, id: b1 = ow_bus_1 _i0 korotus +1 name: korotus +1
   # (Konfiguraatio jatkuu vastaavalla tavalla väylille 1-8 (esim. ow_bus_1, ow_bus_2, ow_bus_3...)
