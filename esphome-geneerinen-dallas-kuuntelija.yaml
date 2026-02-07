@@ -29,7 +29,7 @@ time:
       - ntp.netnod.se
 
 # =============================================================================
-# VÄYLÄMÄÄRITYKSET
+# VÄYLÄMÄÄRITYKSET - scan: ALL hävitetty koska hävinnyt koodista
 # =============================================================================
 one_wire:
   - platform: gpio
