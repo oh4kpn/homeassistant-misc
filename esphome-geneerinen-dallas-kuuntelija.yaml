@@ -14,8 +14,8 @@ esp32:
     type: esp-idf
 
 packages:
-  wifi: !include common/wifi.yaml
-  otaapi: !include common/otaapi.yaml
+  wifi: !include common/wifi.yaml         # wifi pyöristetty packagen kautta (useampi verkko, prio järjestys sekä secrettikäsittelyn kautta)
+  otaapi: !include common/otaapi.yaml     # ota ja api pyöristetty packagen kautta (eräissä tiloissa kireähköt säädöt, eräissä löysemmät)
 
 logger:
   level: VERBOSE
@@ -23,7 +23,7 @@ logger:
 time:
   - platform: sntp
     id: sntp_time
-    timezone: "EET-2EEST,M3.5.0/3,M10.5.0/4"
+    timezone: "EET-2EEST,M3.5.0/3,M10.5.0/4" # Suomi Hesuli alkuvuodesta 2026, ennenkuin lakimuutoksella saadaan pysyvä normaaliaika koko suomeen, tai mahdollisesti EU:n tai koko maailman viralliseksi ajaksi suomen normaaliaika ISO 8601 muodossa, tanskalaisella sorttauksella
     servers:
       # vain julkiset, tietoturvasyistä)
       - ntp.netnod.se
