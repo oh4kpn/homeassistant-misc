@@ -1,90 +1,223 @@
-#essi esimerkkinä laitteen vilp 1 dallasien kuuntelu
-input_number:
-  vilp1_vesi_in:
-    name: "Vesi IN Vilp 1"
-    min: -40
-    max: 125
-    step: 0.01
-  vilp1_vesi_out:
-    name: "Vesi OUT Vilp 1"
-    min: -40
-    max: 125
-    step: 0.01
-  vilp1_kaasu_in:
-    name: "Kaasu IN Vilp 1"
-    min: -40
-    max: 125
-    step: 0.01
-  vilp1_kaasu_out:
-    name: "Kaasu OUT Vilp 1"
-    min: -40
-    max: 125
-    step: 0.01
-
-automation:
-  - alias: "Update VILP 1 Dallas Sensors"
-    mode: queued
-    trigger:
+template: 
+  # ==================================================
+  # Hirviö Testi 1
+  # ==================================================
+  - trigger:
       - platform: event
         event_type: esphome.dallas_raw
-    action:
-      - choose:
-          - conditions: >
-              {{ trigger.event.data.address | lower == '0xeb01221127e6d228' }}
-            sequence:
-              - service: input_number.set_value
-                target:
-                  entity_id: input_number.vilp1_vesi_in
-                data:
-                  value: "{{ trigger.event.data.value | float | round(2) }}"
-
-          - conditions: >
-              {{ trigger.event.data.address | lower == '0xdb012211072f6b28' }}
-            sequence:
-              - service: input_number.set_value
-                target:
-                  entity_id: input_number.vilp1_vesi_out
-                data:
-                  value: "{{ trigger.event.data.value | float | round(2) }}"
-
-          - conditions: >
-              {{ trigger.event.data.address | lower == '0x66012211281e8a28' }}
-            sequence:
-              - service: input_number.set_value
-                target:
-                  entity_id: input_number.vilp1_kaasu_in
-                data:
-                  value: "{{ trigger.event.data.value | float | round(2) }}"
-
-          - conditions: >
-              {{ trigger.event.data.address | lower == '0x71012211374bde28' }}
-            sequence:
-              - service: input_number.set_value
-                target:
-                  entity_id: input_number.vilp1_kaasu_out
-                data:
-                  value: "{{ trigger.event.data.value | float | round(2) }}"
-
-template:
-  - sensor:
-      - name: "Vesi IN Vilp 1"
+        event_data:
+          address: "0x9c000000847d4828"
+    sensor:
+      - name: "Hirviö testi 1"
+        unique_id: "dallas_0x9c000000847d4828"
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
         unit_of_measurement: "°C"
         device_class: temperature
         state_class: measurement
-        state: "{{ states('input_number.vilp1_vesi_in') | float }}"
-      - name: "Vesi OUT Vilp 1"
-        unit_of_measurement: "°C"
-        device_class: temperature
-        state_class: measurement
-        state: "{{ states('input_number.vilp1_vesi_out') | float }}"
-      - name: "Kaasu IN Vilp 1"
-        unit_of_measurement: "°C"
-        device_class: temperature
-        state_class: measurement
-        state: "{{ states('input_number.vilp1_kaasu_in') | float }}"
-      - name: "Kaasu OUT Vilp 1"
-        unit_of_measurement: "°C"
-        device_class: temperature
-        state_class: measurement
-        state: "{{ states('input_number.vilp1_kaasu_out') | float }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
 
+  # ==================================================
+  # KONE 1
+  # ==================================================
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0x66012211281e8a28"
+    sensor:
+      - name: "Kone 1 Kaasu In"
+        unique_id: "dallas_0x66012211281e8a28"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0x71012211374bde28"
+    sensor:
+      - name: "Kone 1 Kaasu Out"
+        unique_id: "dallas_0x71012211374bde28"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0xeb01221127e6d228"
+    sensor:
+      - name: "Kone 1 Vesi In"
+        unique_id: "dallas_0xeb01221127e6d228"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0xdb012211072f6b28"
+    sensor:
+      - name: "Kone 1 Vesi Out"
+        unique_id: "dallas_0xdb012211072f6b28"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+
+  # ==================================================
+  # KONE 2
+  # ==================================================
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0x45012211338d5c28"
+    sensor:
+      - name: "Kone 2 Kaasu In"
+        unique_id: "dallas_0x45012211338d5c28"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0x820122113e8dc928"
+    sensor:
+      - name: "Kone 2 Kaasu Out"
+        unique_id: "dallas_0x820122113e8dc928"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0x7501221102254428"
+    sensor:
+      - name: "Kone 2 Vesi In"
+        unique_id: "dallas_0x7501221102254428"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0x52012211046ff828"
+    sensor:
+      - name: "Kone 2 Vesi Out"
+        unique_id: "dallas_0x52012211046ff828"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+          
+  # ==================================================
+  # Dallas Ouman Paluu
+  # ==================================================
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0xee012211033e9028"
+    sensor:
+      - name: "Dallas Ouman Paluu"
+        unique_id: "dallas_0xdc01221106e20c28"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
+
+  # ==================================================
+  # Dallas Ouman Meno
+  # ==================================================
+  - trigger:
+      - platform: event
+        event_type: esphome.dallas_raw
+        event_data:
+          address: "0xdc01221106e20c28"
+    sensor:
+      - name: "Dallas Ouman Meno"
+        unique_id: "dallas_0xdc01221106e20c28"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
+        attributes:
+          address: "{{ trigger.event.data.address }}"
+          hub: "{{ trigger.event.data.hub }}"
+          measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          last_event_received: "{{ now() }}"
