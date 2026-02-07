@@ -19,7 +19,7 @@ Laite käyttää ESP-IDF-frameworkia ja ESPHome-alustaa. Toisin kuin perinteiset
 ## 🧠 Toteutustapa: Explicit Copypasta Architecture™
 
 Koska `dallas/one_wire` -komponentin tuki automaattiselle skannaukselle ja iteraatiolle on nykyisissä versioissa rajallinen, toteutus on tehty eksplisiittisesti määrittelemällä jokainen anturi erikseen. Tämä takaa:
-1. **Maksimaalisen kontrollin**: Jokaisella anturilla on omat suodattimensa.
+1. **Maksimaalisen kontrollin**
 2. **Diagnostiikan**: Virheelliset arvot (`85.0`, `-127.0`, `0.0`, `nan`) karsitaan jo laitteen päässä.
 3. **Pomminkestävyyden**: Väylähäiriöt yhdellä linjalla eivät vaikuta muihin.
 
