@@ -18,6 +18,7 @@ template:
           address: "{{ trigger.event.data.address }}"
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   # ==================================================
@@ -40,6 +41,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   - trigger:
@@ -59,6 +61,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   - trigger:
@@ -78,6 +81,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   - trigger:
@@ -97,6 +101,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   # ==================================================
@@ -119,6 +124,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   - trigger:
@@ -138,6 +144,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   - trigger:
@@ -157,6 +164,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   - trigger:
@@ -176,6 +184,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
           
   # ==================================================
@@ -198,6 +207,7 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
 
   # ==================================================
@@ -220,4 +230,5 @@ template:
           hub: "{{ trigger.event.data.hub }}"
           measured_at: "{{ as_datetime(trigger.event.data.measured_at) }}"
           last_reported: "{{ as_datetime(trigger.event.data.measured_at) }}"
+          time_synced: "{{ trigger.event.data.time_synced == 'true' }}"
           last_event_received: "{{ now() }}"
